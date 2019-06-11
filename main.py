@@ -412,7 +412,8 @@ def InList(str, tmplist):
 
 
 if __name__ == '__main__':
-    main3()
+    # main3()
+    print("run main3()")
     '''
     csv_array = []
     GetFiles(csv_array, r"/Users/Jerry/OneDrive/Python/EditPat", ".csv")  # main2()
