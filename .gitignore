@@ -1,0 +1,6 @@
+/.vscode
+/__pycache__
+/build
+/upx-395-win64
+/dist
+/*.spec

@@ -9,16 +9,17 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 from argparse import FileType
-from main import main3
+from main import *
 
 
 class DemoClass(tk.Tk):
+
     def __init__(self):
         super().__init__()  # 有点相当于tk.Tk()
         self.createWidgets()
 
     def createWidgets(self):
-        self.title('Pattern Auto Edit Tool V1.4')
+        self.title('Pattern Auto Edit Tool V1.6')
         self.columnconfigure(0, minsize=50)
 
         topframe = tk.Frame(self, height=80)
@@ -31,7 +32,10 @@ class DemoClass(tk.Tk):
         # self.ety2.pack()
         self.ety2.grid(row=0, column=0)
 
-        self.btn2 = tk.Button(topframe, text='Select ATP Files', command=self.CallATPFile)
+        self.btn2 = tk.Button(
+            topframe,
+            text='Select ATP Files',
+            command=self.CallATPFile)
         # self.btn2.pack()
         self.btn2.grid(row=0, column=1)
 
@@ -45,7 +49,10 @@ class DemoClass(tk.Tk):
         # self.ety3.pack()
         self.ety3.grid(row=1, column=0)
 
-        self.btn2 = tk.Button(topframe, text='Select CSV Files', command=self.CallCSVFile)
+        self.btn2 = tk.Button(
+            topframe,
+            text='Select CSV Files',
+            command=self.CallCSVFile)
         # self.btn2.pack()
         self.btn2.grid(row=1, column=1)
 
@@ -98,17 +105,19 @@ class DemoClass(tk.Tk):
         PinName = self.ety.get()
         Mode = self.cmb.get()
         TimeMode = self.cmb2.get()
-        main3(ATPFile, CSVFile, PinName, Mode, TimeMode)
+        main4(ATPFile, CSVFile, PinName, Mode, TimeMode)
 
     def CallATPFile(self):
         global ATPfilename
-        ATPfilename = tk.filedialog.askopenfilenames(filetypes=[('ATP File', '*.atp'), ("all", "*.*")])  #
+        ATPfilename = tk.filedialog.askopenfilenames(
+            filetypes=[('ATP File', '*.atp'), ("all", "*.*")])  #
         self.contents2.set(ATPfilename)
         # print(filename)
 
     def CallCSVFile(self):
         global CSVfilename
-        CSVfilename = tk.filedialog.askopenfilenames(filetypes=[('CSV File', '*.csv'), ("all", "*.*")])
+        CSVfilename = tk.filedialog.askopenfilenames(
+            filetypes=[('CSV File', '*.csv'), ("all", "*.*")])
         self.contents3.set(CSVfilename)
         # print(filename)
 
@@ -144,8 +153,9 @@ class MyMenu():
         root.config(menu=self.menubar)
 
     def help_about(self):
-        messagebox.showinfo('About',
-                            'Author：Chao Zhou \n verion 1.4 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
+        messagebox.showinfo(
+            'About',
+            'Author：Chao Zhou \n verion 1.6 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
 
 
 if __name__ == '__main__':
