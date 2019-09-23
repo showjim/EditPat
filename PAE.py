@@ -19,7 +19,7 @@ class DemoClass(tk.Tk):
         self.createWidgets()
 
     def createWidgets(self):
-        self.title('Pattern Auto Edit Tool V1.6')
+        self.title('Pattern Auto Edit Tool V1.7')
         self.columnconfigure(0, minsize=50)
 
         topframe = tk.Frame(self, height=80)
@@ -71,7 +71,7 @@ class DemoClass(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture']
+        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=27)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
@@ -155,7 +155,7 @@ class MyMenu():
     def help_about(self):
         messagebox.showinfo(
             'About',
-            'Author：Chao Zhou \n verion 1.6 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
+            'Author：Chao Zhou \n verion 1.7 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
 
 
 if __name__ == '__main__':

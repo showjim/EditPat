@@ -12,11 +12,14 @@ def EditPattern(PinName, something, CSVFile, Mode, timemode):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
-
-    RemoveRepeat(something, timemode)
+    if Mode=='Expand Pattern':
+        RemoveRepeat(something, timemode)
+        RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
+        return
+    
     CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
-    RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
+    
     LineIndex = 0
     CycleNum = 0
     RepeatCnt = 0
@@ -136,7 +139,6 @@ def EditPattern(PinName, something, CSVFile, Mode, timemode):
 
                 if len(line) == 0:
                     break
-    os.remove(RemoveRepeatFile)
 
 
 def ReadCSV(something):
@@ -322,6 +324,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
             elif Mode == 'DSSC Source':
                 EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
             elif Mode == 'CMEM/HRAM Capture':
+                EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
+            elif Mode == 'Expand Pattern':
                 EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
             else:
                 print("Wrong Choice !!!")
