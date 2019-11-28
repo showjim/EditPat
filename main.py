@@ -8,7 +8,7 @@ import os
 import re
 
 
-def EditPattern(PinName, something, CSVFile, Mode, timemode):
+def EditPattern(PinName, something, CycleRange, Mode, timemode):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
@@ -17,7 +17,7 @@ def EditPattern(PinName, something, CSVFile, Mode, timemode):
         RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
         return
     
-    CycleRange = ReadCSV(CSVFile)
+    #CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
     
     LineIndex = 0
@@ -57,6 +57,8 @@ def EditPattern(PinName, something, CSVFile, Mode, timemode):
                     # check the index of pin
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
+                        if Index==0:
+                            print('Error: Cannot find pinname')
                         NewATPfile.write(line)
 
                     else:
@@ -142,15 +144,17 @@ def EditPattern(PinName, something, CSVFile, Mode, timemode):
 
 
 def ReadCSV(something):
-    CycleRange = []
+    CycleRange = {}
+    #x=[]
     with open(something) as f:
         f_csv = csv.reader(f)
         for row in f_csv:
-            if f_csv.line_num == 1:
-                continue
-            tmparray = re.findall(r"\d+", row[0])
-            tmparray = sorted([int(x) for x in tmparray])
-            CycleRange.append(tmparray)
+            #if f_csv.line_num == 1:
+            tmparray = row[1].replace('[','').replace(']','')
+            tmparray = tmparray.split(';')
+            tmparray=[x.split('-') for x in tmparray]
+            tmparray=[sorted([int(y) for y in x]) for x in tmparray]
+            CycleRange[row[0]]=tmparray
     return CycleRange
 
 
@@ -174,6 +178,7 @@ def FindPinIndex(PinName, STRLine):
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
     pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)\s*])')
     tmparray = re.findall(pattern, STRLine)
+    Index=-1
     for x in range(len(tmparray)):
         if tmparray[x] == PinName:
             Index = x
@@ -313,22 +318,28 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
         timemode = '1'
     elif TimeMode == 'Dual':
         timemode = '2'
+    CycleRanges = []
+    if len(CSVFiles)>1:
+        print("Error: Only ONE CSV file supported !!!")
+        return
+    CycleRanges = ReadCSV(CSVFiles[0])
 
-    for i in range(len(CSVFiles)):
-        tmpFileName = CSVFiles[i].replace('.csv', '.atp')
+    for key in CycleRanges.keys():
+        tmpFileName =key #CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
         j = InList(tmpFileName, ATPFiles)
         if j >= 0:
-
             if Mode == 'DSSC Capture':
-                EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j],CycleRanges[key], Mode, timemode)
             elif Mode == 'DSSC Source':
-                EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'CMEM/HRAM Capture':
-                EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'Expand Pattern':
-                EditPattern(PinName, ATPFiles[j], CSVFiles[i], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             else:
-                print("Wrong Choice !!!")
+                print("Error: Wrong Choice !!!")
+        else:
+            print("Error: Cannot find atp file !!!")
 
 
 def GetFiles(files_array, dirname, extname):
@@ -346,7 +357,7 @@ def GetFiles(files_array, dirname, extname):
 
 def InList(str, tmplist):
     for i in range(len(tmplist)):
-        if str == tmplist[i]:
+        if tmplist[i].find(str)>-1:
             return i
     return -1
 
