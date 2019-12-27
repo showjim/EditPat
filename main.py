@@ -345,7 +345,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
             else:
                 print("Error: Wrong Choice !!!")
         else:
-            print("Error: Cannot find atp file !!!")
+            print("Error: Cannot find atp file: " + tmpFileName)
 
 
 def GetFiles(files_array, dirname, extname):
