@@ -209,7 +209,7 @@ def FindPinIndex(PinName, STRLine):
 #                 else:
 #                     NewATPfile.write(line)
 def RemoveRepeat(something, timemode):
-    otherthing = os.path.realpath('new_RemoveRepeat.atp')
+    otherthing = something.replace(r'.atp',r'_RemoveRepeat.atp') #os.path.realpath('new_RemoveRepeat.atp')
 
     LineIndex = 0
     RepeatCnt = 1
@@ -231,8 +231,7 @@ def RemoveRepeat(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.find(r"start_label") != - \
-                            1:  # check the header part
+                    if headerline.strip().startswith(r"start_label"):  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
@@ -241,8 +240,15 @@ def RemoveRepeat(something, timemode):
                     NewATPfile.write(headerline)
                 else:
                     for i in range(linenum):
-                        line.append(ATPfile.readline())
-                        LineIndex += 1
+                        
+                        while True:
+                            tmpLine = ATPfile.readline()
+                            LineIndex += 1
+                            if tmpLine.strip().startswith(r'//'):
+                                continue
+                            else:
+                                break
+                        line.append(tmpLine)
                     RepeatCnt = 1
                     p = re.compile(r'(?<=repeat)\s+\d+')
                     m = re.search(p, line[-1])
@@ -265,7 +271,7 @@ def RemoveRepeat(something, timemode):
                         for i in range(len(line)):
                             NewATPfile.write(line[i])
 
-                        if line[-1].find(r'halt') != -1:
+                        if (line[-1].find(r'}') != -1) or line[-1] == '':
                             Boby_Flag = False
 
 
