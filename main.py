@@ -125,8 +125,8 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    line = line[0:ModifyIndex] + \
-                                        "V" + line[ModifyIndex + 1:]
+                                    # line = line[0:ModifyIndex] + \
+                                    #     "V" + line[ModifyIndex + 1:]
                                     line = "stv    " + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum+RepeatCnt-1]
