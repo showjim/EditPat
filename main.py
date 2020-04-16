@@ -16,7 +16,11 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
         RemoveRepeat(something, timemode)
         RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
         return
-    
+    if Mode=='Compress Pattern':
+        AddReapt(something, timemode)
+        return
+
+
     #CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
     
@@ -275,6 +279,69 @@ def RemoveRepeat(something, timemode):
                             Boby_Flag = False
 
 
+def AddReapt(something, timemode):
+    '''tmpstr = open('','r')'''
+    #print(os.getcwd())
+    #print(something)
+
+    otherthing = something.replace(r'.atp', r'_AddRepeat.atp')
+
+    LineIndex = 0
+    RepeatCnt = 1
+    PrevLine = []  # ""
+    #line = []
+    linenum = 0
+    Boby_Flag = False
+
+    if timemode == '1':
+        linenum = 1
+    elif timemode == '2':
+        linenum = 2
+
+    with open(otherthing, mode='w') as NewATPfile:
+        with open(something) as ATPfile:
+            while True:
+                line = []  # initial line for dual mode
+                if not Boby_Flag:
+                    headerline = ATPfile.readline()
+                    if headerline.find(r"start_label") != -1:  # check the header part
+                        Boby_Flag = True
+
+                    if len(headerline) == 0:
+                        break
+
+                    NewATPfile.write(headerline)
+                else:
+                    for i in range(linenum):
+                        line.append(ATPfile.readline())
+                        LineIndex += 1
+                    #print(line)
+                    # pass
+
+                    if cmp(line, PrevLine) == 0:
+                        RepeatCnt += 1
+
+                    if cmp(line, PrevLine) != 0 and LineIndex != linenum:
+
+                        for i in range(len(PrevLine) - 1):
+                            NewATPfile.write('{0}'.format(PrevLine[i]))  # write lines but last line in block
+
+                        if RepeatCnt != 1:  # write last line
+                            NewATPfile.write('repeat {0}    {1}'.format(RepeatCnt, PrevLine[-1]))
+                        else:
+                            NewATPfile.write('{0}'.format(PrevLine[-1]))
+                        RepeatCnt = 1
+
+                    # if len(line[-1]) == 0:
+                    #     break
+                    if (line[-1].find(r'}') != -1) or line[-1] == '':
+                        Boby_Flag = False
+                        for i in range(len(line)):
+                            NewATPfile.write('{0}'.format(line[i]))
+
+                    PrevLine = line
+
+
 def GetRepeatCnt(line):
     RepeatCnt = 0
     p = re.compile(r'(?<=repeat)\s+\d+')
@@ -296,6 +363,28 @@ def Trim(mystr):
         else:
             x = x + tmpstr
     return x
+
+
+def cmp(a, b):  # compare two lists
+    listlena = len(a)
+    listlenb = len(b)
+    result = -1
+    if listlena == listlenb:
+        # tempa = ''
+        # aa = '1112222" /Users/Jerry/OneDrive/Python/EditRepeatTool/test.txt
+        for i in range(listlena):
+            tempa = str(a[i])
+            commtindexa = tempa.find('//')
+            tempb = str(b[i])
+            commtindexb = tempa.find('//')
+            if commtindexa > 0:
+                tempa = tempa[:commtindexa]
+            if commtindexb > 0:
+                tempb = tempb[:commtindexb]
+            result = (tempa > tempb) - (tempa < tempb)
+            if result != 0:
+                break
+    return result
 
 
 def main11():
@@ -341,6 +430,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
             elif Mode == 'CMEM/HRAM Capture':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'Expand Pattern':
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+            elif Mode == 'Compress Pattern':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             else:
                 print("Error: Wrong Choice !!!")
