@@ -313,8 +313,16 @@ def AddReapt(something, timemode):
                     NewATPfile.write(headerline)
                 else:
                     for i in range(linenum):
-                        line.append(ATPfile.readline())
-                        LineIndex += 1
+
+                        while True:
+                            tmpLine = ATPfile.readline()
+                            LineIndex += 1
+                            if tmpLine.strip().startswith(r'//'):
+                                continue
+                            else:
+                                break
+                        line.append(tmpLine)
+                        # LineIndex += 1
                     #print(line)
                     # pass
 
