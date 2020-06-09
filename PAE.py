@@ -19,7 +19,7 @@ class DemoClass(tk.Tk):
         self.createWidgets()
 
     def createWidgets(self):
-        self.title('Pattern Auto Edit Tool V1.9.0')
+        self.title('Pattern Auto Edit Tool V1.9.1')
         self.columnconfigure(0, minsize=50)
 
         topframe = tk.Frame(self, height=80)
@@ -155,7 +155,7 @@ class MyMenu():
     def help_about(self):
         messagebox.showinfo(
             'About',
-            'Author：Chao Zhou \n verion 1.9.0 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
+            'Author：Chao Zhou \n verion 1.9.1 \n 感谢您的使用！ \n chao.zhou@teradyne.com ')  # message box
 
 
 if __name__ == '__main__':
