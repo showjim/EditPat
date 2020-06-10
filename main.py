@@ -378,7 +378,6 @@ def cmp(a, b):  # compare two lists
     result = -1
     if listlena == listlenb:
         # tempa = ''
-        # aa = '1112222" /Users/Jerry/OneDrive/Python/EditRepeatTool/test.txt
         for i in range(listlena):
             tempa = str(a[i])
             commtindexa = tempa.find('//')
@@ -403,10 +402,6 @@ def main11():
         '1.DSSC Capture;\n2.DSSC Source;\n3.CMEM/HRAM Capture.\n')
     timemode = input('1. Single\n2. Dual')
 
-    # DSSCCap(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_READ_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Book1.csv")
-    # DSSCSrc(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_WRITE_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Write.csv")
-    # CMEMCap(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_READ_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Book1.csv")
-    # os.system('pause')
     input('Press Enter key to exit!')
 
 
