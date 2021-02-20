@@ -26,10 +26,12 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
     LineIndex = 0
     CycleNum = 0
     RepeatCnt = 0
-
+    # remove all "repeat" opcode first
+    RemoveRepeat(something, timemode)
+    RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
     with open(otherthing, mode='w') as NewATPfile:
-        # with open(RemoveRepeatFile) as ATPfile:
-        with open(something) as ATPfile:
+        with open(RemoveRepeatFile) as ATPfile:
+        # with open(something) as ATPfile:
             while True:
                 line = ATPfile.readline()
                 LineIndex += 1
@@ -106,7 +108,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                     line = line[0:ModifyIndex] + \
                                            "V" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigCap = Store)".format(
-                                        PinName) + line
+                                        PinName) + " " + line
 
                         elif Mode == 'DSSC Source':
                             if RepeatCnt == 1:
@@ -122,7 +124,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                     line = line[0:ModifyIndex] + \
                                            "D" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigSrc = Send)".format(
-                                        PinName) + line
+                                        PinName) + " " + line
 
                         elif Mode == 'CMEM/HRAM Capture':
                             if RepeatCnt == 1:
@@ -144,6 +146,10 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
 
                 if len(line) == 0:
                     break
+        if os.path.exists(RemoveRepeatFile):
+            os.remove(RemoveRepeatFile)
+        else:
+            print("The file " + RemoveRepeatFile + " does not exist")
 
 
 def ReadCSV(something):
