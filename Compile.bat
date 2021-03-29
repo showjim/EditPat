@@ -1,1 +1,1 @@
-pyinstaller --icon=icon.ico --onefile -w --upx-dir C:\Python37\upx-395-win64 PAE.py
+pyinstaller --icon=icon.ico --onefile -w PAE.py

@@ -35,6 +35,10 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
             while True:
                 line = ATPfile.readline()
                 LineIndex += 1
+                # trim line, replace multiple-space to single space
+                # line = line.replace(r" +", " ")
+                # strinfo = re.compile(' +')
+                # line = strinfo.sub(' ', line)
 
                 # modify the body part of atp file
                 if line.find(r">") == -1:
@@ -42,6 +46,9 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     if line[0:6] == "import":
                         tset = line[12:-2]
                         NewATPfile.write(line)
+                        # convert to list
+                        tset = tset.replace(';', '').replace(' ', '')
+                        tset_list = tset.split(',')
 
                         if Mode == 'DSSC Capture':
                             NewATPfile.write("\n")
@@ -68,7 +75,9 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
 
                     else:
                         NewATPfile.write(line)
-                elif line.find(r"> {0}".format(tset)) != -1:
+                # elif line.find(r"> {0}".format(tset)) != -1:
+                elif Check_tset_line(tset_list, line) != -1:
+                    tset_index = Check_tset_line(tset_list, line)
                     RepeatCnt = GetRepeatCnt(line)
                     if CycleNum == 0:
 
@@ -76,7 +85,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                         ModifyIndex = 0
                         CountNum = 0
 
-                        pattern = re.compile(r"> {0}".format(tset))
+                        pattern = re.compile(r"> {0}".format(tset_list[tset_index]))
                         StartSearchPos = re.search(pattern, line).end()
                         ModifyIndex = StartSearchPos
                         for x in line[StartSearchPos:]:
@@ -91,7 +100,8 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     if (CycleNum == 1) and (Mode == 'DSSC Source'):
                         line = "(({0}):DigSrc = Start DSSCSrcSig)".format(
                             PinName) + line
-
+                    if CycleNum == 7478:
+                        print("OK")
                     if (CycleNum >= CycleRange[0][0]) and (
                             CycleNum <= CycleRange[-1][1]):
                         if Mode == 'DSSC Capture':
@@ -151,6 +161,15 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
         else:
             print("The file " + RemoveRepeatFile + " does not exist")
 
+
+def Check_tset_line(tset_list, line):
+    i = -1
+    for i,val in enumerate(tset_list):
+        # last space need here to ensure the end
+        val = r"> {0} ".format(val)
+        if val in line:
+            return i
+    return i
 
 def ReadCSV(something):
     CycleRange = {}
