@@ -100,8 +100,6 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     if (CycleNum == 1) and (Mode == 'DSSC Source'):
                         line = "(({0}):DigSrc = Start DSSCSrcSig)".format(
                             PinName) + line
-                    if CycleNum == 7478:
-                        print("OK")
                     if (CycleNum >= CycleRange[0][0]) and (
                             CycleNum <= CycleRange[-1][1]):
                         if Mode == 'DSSC Capture':
@@ -259,7 +257,7 @@ def RemoveRepeat(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.strip().startswith(r"start_label"):  # check the header part
+                    if headerline.strip().startswith(r"{"): #(r"start_label"):  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
