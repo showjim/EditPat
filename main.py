@@ -40,15 +40,11 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                 # strinfo = re.compile(' +')
                 # line = strinfo.sub(' ', line)
 
-                # modify the body part of atp file
+                # modify the head part of atp file
                 if line.find(r">") == -1:
                     # check the timeset name
-                    if line[0:6] == "import":
-                        tset = line[12:-2]
+                    if line[0:12] == "import tset " or line[0:22] == 'import_all_undefineds ':
                         NewATPfile.write(line)
-                        # convert to list
-                        tset = tset.replace(';', '').replace(' ', '')
-                        tset_list = tset.split(',')
 
                         if Mode == 'DSSC Capture':
                             NewATPfile.write("\n")
@@ -75,18 +71,17 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
 
                     else:
                         NewATPfile.write(line)
-                # elif line.find(r"> {0}".format(tset)) != -1:
-                elif Check_tset_line(tset_list, line) != -1:
-                    tset_index = Check_tset_line(tset_list, line)
+                else:
+                    # tset_index = Check_tset_line(tset_list, line)
                     RepeatCnt = GetRepeatCnt(line)
                     if CycleNum == 0:
-
                         # find the modify position
                         ModifyIndex = 0
                         CountNum = 0
 
-                        pattern = re.compile(r"> {0}".format(tset_list[tset_index]))
+                        pattern = re.compile(r"> *\S+")
                         StartSearchPos = re.search(pattern, line).end()
+
                         ModifyIndex = StartSearchPos
                         for x in line[StartSearchPos:]:
 
@@ -161,13 +156,14 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
 
 
 def Check_tset_line(tset_list, line):
-    i = -1
+    ii = -1
     for i,val in enumerate(tset_list):
         # last space need here to ensure the end
         val = r"> {0} ".format(val)
         if val in line:
-            return i
-    return i
+            ii = i
+            return ii
+    return ii
 
 def ReadCSV(something):
     CycleRange = {}
