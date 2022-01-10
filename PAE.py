@@ -11,7 +11,7 @@ from tkinter import messagebox
 from argparse import FileType
 from main import *
 
-version = 'V1.9.4'
+version = 'V1.9.5'
 
 class DemoClass(tk.Tk):
 
@@ -72,7 +72,7 @@ class DemoClass(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern']
+        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=27)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
