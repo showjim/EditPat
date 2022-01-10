@@ -106,8 +106,10 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                             line = '' + line
                         if CycleNum == 3:
                             line = '' + line
-                        if CheckInRange(CycleNum - 1, CycleRange):
-                            line = '' + line
+                        if (CycleNum + 1 >= CycleRange[0][0]) and (
+                            CycleNum + 1 <= CycleRange[-1][1]):
+                            if CheckInRange(CycleNum + 1, CycleRange):
+                                line = '' + line
 
                     if (CycleNum >= CycleRange[0][0]) and (
                             CycleNum <= CycleRange[-1][1]):
