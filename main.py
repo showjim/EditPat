@@ -58,7 +58,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                             # do nothing here
                             pass
 
-                    # check the index of pin
+                    # check the index of pin in pin head
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
                         if Index==0:
@@ -70,8 +70,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                 elif line.find(r"> {0}".format(tset)) != -1:
                     RepeatCnt = GetRepeatCnt(line)
                     if CycleNum == 0:
-
-                        # find the modify position
+                        # find the modify pin position
                         ModifyIndex = 0
                         CountNum = 0
 
@@ -90,6 +89,19 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     if (CycleNum == 1) and (Mode == 'DSSC Source'):
                         line = "(({0}):DigSrc = Start DSSCSrcSig)".format(
                             PinName) + line
+
+                    # add wflag setup
+                    if Mode == 'WFLAG':
+                        if CycleNum == 0:
+                            line = '' + line
+                        if CycleNum == 1:
+                            line = '' + line
+                        if CycleNum == 2:
+                            line = '' + line
+                        if CycleNum == 3:
+                            line = '' + line
+                        if CheckInRange(CycleNum - 1, CycleRange):
+                            line = '' + line
 
                     if (CycleNum >= CycleRange[0][0]) and (
                             CycleNum <= CycleRange[-1][1]):
@@ -131,13 +143,21 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                     # line[ModifyIndex] = "V"
                                     line = line[0:ModifyIndex] + \
                                         "V" + line[ModifyIndex + 1:]
-                                    line = "stv    " + line
+                                    line = "stv\t" + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum+RepeatCnt-1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
                                     line = line[0:ModifyIndex] + \
                                         "V" + line[ModifyIndex + 1:]
                                     line = line.replace('repeat', 'stv,repeat')
+
+                        elif Mode == 'WFLAG':
+                            if RepeatCnt == 1:
+                                if CheckInRange(CycleNum, CycleRange):
+                                    line = 'wflag\t' + line
+                                else:
+                                    # WFLAG does not support on repeat line
+                                    pass
 
                     NewATPfile.write(line)
                     #CycleNum += 1
@@ -432,6 +452,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
             elif Mode == 'Expand Pattern':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'Compress Pattern':
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+            elif Mode == 'WLFAG':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             else:
                 print("Error: Wrong Choice !!!")

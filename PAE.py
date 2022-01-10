@@ -19,7 +19,7 @@ class DemoClass(tk.Tk):
         self.createWidgets()
 
     def createWidgets(self):
-        self.title('Pattern Auto Edit Tool V1.9.0')
+        self.title('Pattern Auto Edit Tool V1.9.1')
         self.columnconfigure(0, minsize=50)
 
         topframe = tk.Frame(self, height=80)
@@ -71,7 +71,7 @@ class DemoClass(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern']
+        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=27)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
