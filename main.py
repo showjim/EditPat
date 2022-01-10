@@ -12,34 +12,38 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
-    if Mode=='Expand Pattern':
+    if Mode == 'Expand Pattern':
         RemoveRepeat(something, timemode)
         RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
         return
-    if Mode=='Compress Pattern':
+    if Mode == 'Compress Pattern':
         AddReapt(something, timemode)
         return
 
-
-    #CycleRange = ReadCSV(CSVFile)
+    # CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
-    
+
     LineIndex = 0
     CycleNum = 0
     RepeatCnt = 0
-
+    # remove all "repeat" opcode first
+    RemoveRepeat(something, timemode)
+    RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
     with open(otherthing, mode='w') as NewATPfile:
-        # with open(RemoveRepeatFile) as ATPfile:
-        with open(something) as ATPfile:
+        with open(RemoveRepeatFile) as ATPfile:
+        # with open(something) as ATPfile:
             while True:
                 line = ATPfile.readline()
                 LineIndex += 1
+                # trim line, replace multiple-space to single space
+                # line = line.replace(r" +", " ")
+                # strinfo = re.compile(' +')
+                # line = strinfo.sub(' ', line)
 
-                # modify the body part of atp file
+                # modify the head part of atp file
                 if line.find(r">") == -1:
                     # check the timeset name
-                    if line[0:6] == "import":
-                        tset = line[12:-2]
+                    if line[0:12] == "import tset " or line[0:22] == 'import_all_undefineds ':
                         NewATPfile.write(line)
 
                         if Mode == 'DSSC Capture':
@@ -61,21 +65,23 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
-                        if Index==0:
+                        if Index == 0:
                             print('Error: Cannot find pinname')
                         NewATPfile.write(line)
 
                     else:
                         NewATPfile.write(line)
-                elif line.find(r"> {0}".format(tset)) != -1:
+                else:
+                    # tset_index = Check_tset_line(tset_list, line)
                     RepeatCnt = GetRepeatCnt(line)
                     if CycleNum == 0:
                         # find the modify pin position
                         ModifyIndex = 0
                         CountNum = 0
 
-                        pattern = re.compile(r"> {0}".format(tset))
+                        pattern = re.compile(r"> *\S+")
                         StartSearchPos = re.search(pattern, line).end()
+
                         ModifyIndex = StartSearchPos
                         for x in line[StartSearchPos:]:
 
@@ -110,32 +116,32 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
                                     line = line[0:ModifyIndex] + \
-                                        "V" + line[ModifyIndex + 1:]
+                                           "V" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigCap = Store)".format(
                                         PinName) + line
                             else:
-                                CycleNumList = [CycleNum, CycleNum+RepeatCnt-1]
+                                CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
                                     line = line[0:ModifyIndex] + \
-                                        "V" + line[ModifyIndex + 1:]
+                                           "V" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigCap = Store)".format(
-                                        PinName) + line
+                                        PinName) + " " + line
 
                         elif Mode == 'DSSC Source':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
                                     line = line[0:ModifyIndex] + \
-                                        "D" + line[ModifyIndex + 1:]
+                                           "D" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigSrc = Send)".format(
                                         PinName) + line
                             else:
-                                CycleNumList = [CycleNum, CycleNum+RepeatCnt-1]
+                                CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
                                     line = line[0:ModifyIndex] + \
-                                        "D" + line[ModifyIndex + 1:]
+                                           "D" + line[ModifyIndex + 1:]
                                     line = "(({0}):DigSrc = Send)".format(
-                                        PinName) + line
+                                        PinName) + " " + line
 
                         elif Mode == 'CMEM/HRAM Capture':
                             if RepeatCnt == 1:
@@ -145,10 +151,10 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                         "V" + line[ModifyIndex + 1:]
                                     line = "stv\t" + line
                             else:
-                                CycleNumList = [CycleNum, CycleNum+RepeatCnt-1]
+                                CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
                                     line = line[0:ModifyIndex] + \
-                                        "V" + line[ModifyIndex + 1:]
+                                           "V" + line[ModifyIndex + 1:]
                                     line = line.replace('repeat', 'stv,repeat')
 
                         elif Mode == 'WFLAG':
@@ -160,25 +166,39 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                     pass
 
                     NewATPfile.write(line)
-                    #CycleNum += 1
+                    # CycleNum += 1
                     CycleNum += RepeatCnt
 
                 if len(line) == 0:
                     break
+        if os.path.exists(RemoveRepeatFile):
+            os.remove(RemoveRepeatFile)
+        else:
+            print("The file " + RemoveRepeatFile + " does not exist")
 
+
+def Check_tset_line(tset_list, line):
+    ii = -1
+    for i,val in enumerate(tset_list):
+        # last space need here to ensure the end
+        val = r"> {0} ".format(val)
+        if val in line:
+            ii = i
+            return ii
+    return ii
 
 def ReadCSV(something):
     CycleRange = {}
-    #x=[]
+    # x=[]
     with open(something) as f:
         f_csv = csv.reader(f)
         for row in f_csv:
-            #if f_csv.line_num == 1:
-            tmparray = row[1].replace('[','').replace(']','')
+            # if f_csv.line_num == 1:
+            tmparray = row[1].replace('[', '').replace(']', '')
             tmparray = tmparray.split(';')
-            tmparray=[x.split('-') for x in tmparray]
-            tmparray=[sorted([int(y) for y in x]) for x in tmparray]
-            CycleRange[row[0]]=tmparray
+            tmparray = [x.split('-') for x in tmparray]
+            tmparray = [sorted([int(y) for y in x]) for x in tmparray]
+            CycleRange[row[0]] = tmparray
     return CycleRange
 
 
@@ -202,7 +222,7 @@ def FindPinIndex(PinName, STRLine):
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
     pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)\s*])')
     tmparray = re.findall(pattern, STRLine)
-    Index=-1
+    Index = -1
     for x in range(len(tmparray)):
         if tmparray[x] == PinName:
             Index = x
@@ -233,7 +253,7 @@ def FindPinIndex(PinName, STRLine):
 #                 else:
 #                     NewATPfile.write(line)
 def RemoveRepeat(something, timemode):
-    otherthing = something.replace(r'.atp',r'_RemoveRepeat.atp') #os.path.realpath('new_RemoveRepeat.atp')
+    otherthing = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('new_RemoveRepeat.atp')
 
     LineIndex = 0
     RepeatCnt = 1
@@ -255,7 +275,7 @@ def RemoveRepeat(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.strip().startswith(r"start_label"):  # check the header part
+                    if headerline.strip().startswith(r"{"): #(r"start_label"):  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
@@ -264,7 +284,7 @@ def RemoveRepeat(something, timemode):
                     NewATPfile.write(headerline)
                 else:
                     for i in range(linenum):
-                        
+
                         while True:
                             tmpLine = ATPfile.readline()
                             LineIndex += 1
@@ -301,15 +321,15 @@ def RemoveRepeat(something, timemode):
 
 def AddReapt(something, timemode):
     '''tmpstr = open('','r')'''
-    #print(os.getcwd())
-    #print(something)
+    # print(os.getcwd())
+    # print(something)
 
     otherthing = something.replace(r'.atp', r'_AddRepeat.atp')
 
     LineIndex = 0
     RepeatCnt = 1
     PrevLine = []  # ""
-    #line = []
+    # line = []
     linenum = 0
     Boby_Flag = False
 
@@ -333,15 +353,23 @@ def AddReapt(something, timemode):
                     NewATPfile.write(headerline)
                 else:
                     for i in range(linenum):
-                        line.append(ATPfile.readline())
-                        LineIndex += 1
-                    #print(line)
+
+                        while True:
+                            tmpLine = ATPfile.readline()
+                            LineIndex += 1
+                            if tmpLine.strip().startswith(r'//'):
+                                continue
+                            else:
+                                break
+                        line.append(tmpLine)
+                        # LineIndex += 1
+                    # print(line)
                     # pass
 
-                    if cmp(line, PrevLine) == 0:
+                    if cmp(line, PrevLine) == 0 and RepeatCnt < 65535:
                         RepeatCnt += 1
-
-                    if cmp(line, PrevLine) != 0 and LineIndex != linenum:
+                    elif LineIndex != linenum:
+                        # if cmp(line, PrevLine) != 0 and LineIndex != linenum:
 
                         for i in range(len(PrevLine) - 1):
                             NewATPfile.write('{0}'.format(PrevLine[i]))  # write lines but last line in block
@@ -391,16 +419,15 @@ def cmp(a, b):  # compare two lists
     result = -1
     if listlena == listlenb:
         # tempa = ''
-        # aa = '1112222" /Users/Jerry/OneDrive/Python/EditRepeatTool/test.txt
         for i in range(listlena):
             tempa = str(a[i])
             commtindexa = tempa.find('//')
             tempb = str(b[i])
             commtindexb = tempa.find('//')
             if commtindexa > 0:
-                tempa = tempa[:commtindexa]
+                tempa = tempa[:commtindexa].strip( )
             if commtindexb > 0:
-                tempb = tempb[:commtindexb]
+                tempb = tempb[:commtindexb].strip( )
             result = (tempa > tempb) - (tempa < tempb)
             if result != 0:
                 break
@@ -416,10 +443,6 @@ def main11():
         '1.DSSC Capture;\n2.DSSC Source;\n3.CMEM/HRAM Capture.\n')
     timemode = input('1. Single\n2. Dual')
 
-    # DSSCCap(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_READ_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Book1.csv")
-    # DSSCSrc(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_WRITE_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Write.csv")
-    # CMEMCap(PinName, r"C:\Users\zhouchao\workspace\EditPat\src\DIEID_READ_R01_SD6183V100.atp", r"C:\Users\zhouchao\workspace\EditPat\src\Book1.csv")
-    # os.system('pause')
     input('Press Enter key to exit!')
 
 
@@ -434,17 +457,17 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
     elif TimeMode == 'Dual':
         timemode = '2'
     CycleRanges = []
-    if len(CSVFiles)>1:
+    if len(CSVFiles) > 1:
         print("Error: Only ONE CSV file supported !!!")
         return
     CycleRanges = ReadCSV(CSVFiles[0])
 
     for key in CycleRanges.keys():
-        tmpFileName =key #CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
+        tmpFileName = key  # CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
         j = InList(tmpFileName, ATPFiles)
         if j >= 0:
             if Mode == 'DSSC Capture':
-                EditPattern(PinName, ATPFiles[j],CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'DSSC Source':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'CMEM/HRAM Capture':
@@ -476,7 +499,7 @@ def GetFiles(files_array, dirname, extname):
 
 def InList(str, tmplist):
     for i in range(len(tmplist)):
-        if tmplist[i].find(str)>-1:
+        if tmplist[i].find(str) > -1:
             return i
     return -1
 
