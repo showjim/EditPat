@@ -112,7 +112,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                         if (CycleNum + 1 >= CycleRange[0][0]) and (
                             CycleNum + 1 <= CycleRange[-1][1]):
                             if CheckInRange(CycleNum + 1, CycleRange):
-                                line = '' + line
+                                line = 'set_cpu_cond (cpuA_cond)\t' + line
 
                     if (CycleNum >= CycleRange[0][0]) and (
                             CycleNum <= CycleRange[-1][1]):
