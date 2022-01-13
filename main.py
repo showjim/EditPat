@@ -198,12 +198,12 @@ def ReadCSV(something):
     with open(something) as f:
         f_csv = csv.reader(f)
         for row in f_csv:
-            # if f_csv.line_num == 1:
-            tmparray = row[1].replace('[', '').replace(']', '')
-            tmparray = tmparray.split(';')
-            tmparray = [x.split('-') for x in tmparray]
-            tmparray = [sorted([int(y) for y in x]) for x in tmparray]
-            CycleRange[row[0]] = tmparray
+            if len(row) > 0:
+                tmparray = row[1].replace('[', '').replace(']', '')
+                tmparray = tmparray.split(';')
+                tmparray = [x.split('-') for x in tmparray]
+                tmparray = [sorted([int(y) for y in x]) for x in tmparray]
+                CycleRange[row[0]] = tmparray
     return CycleRange
 
 
@@ -481,7 +481,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'Compress Pattern':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
-            elif Mode == 'WLFAG':
+            elif Mode == 'WFLAG':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             else:
                 print("Error: Wrong Choice !!!")
