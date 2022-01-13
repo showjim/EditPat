@@ -61,6 +61,9 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                         elif Mode == 'CMEM/HRAM Capture':
                             # do nothing here
                             pass
+                        elif Mode == 'WFLAG':
+                            # do nothing here
+                            pass
 
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
@@ -99,13 +102,13 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                     # add wflag setup
                     if Mode == 'WFLAG':
                         if CycleNum == 0:
-                            line = '' + line
+                            line = 'branch_expr = (!cpuA_cond)\t' + line
                         if CycleNum == 1:
-                            line = '' + line
+                            line = 'set_msb_infinite\t' + line
                         if CycleNum == 2:
-                            line = '' + line
+                            line = 'set_infinite c0\t' + line
                         if CycleNum == 3:
-                            line = '' + line
+                            line = 'push_loop c0\t' + line
                         if (CycleNum + 1 >= CycleRange[0][0]) and (
                             CycleNum + 1 <= CycleRange[-1][1]):
                             if CheckInRange(CycleNum + 1, CycleRange):
