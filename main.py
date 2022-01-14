@@ -204,6 +204,8 @@ def ReadCSV(something):
                 tmparray = [x.split('-') for x in tmparray]
                 tmparray = [sorted([int(y) for y in x]) for x in tmparray]
                 CycleRange[row[0]] = tmparray
+            else:
+                break
     return CycleRange
 
 
