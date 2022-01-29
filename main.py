@@ -8,7 +8,7 @@ import os
 import re
 
 
-def EditPattern(PinName, something, CycleRange, Mode, timemode):
+def EditPattern(PinName, something, CycleRange, Mode, timemode, UserString = ''):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
@@ -64,6 +64,17 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                         elif Mode == 'WFLAG':
                             # do nothing here
                             pass
+                        elif Mode == 'Call Label':
+                            NewATPfile.write("\n")
+                            NewATPfile.write("import subr " + UserString + ";\n") #import label
+
+                            if PinName != '': # if PinName is not empty, then add them as DCVS
+                                PinNameList = PinName.split(',')
+                                NewATPfile.write("instruments = {\n")
+                                for pin in PinNameList:
+                                    NewATPfile.write(
+                                        "{0}:DCVS 1:;\n".format(pin))
+                                NewATPfile.write("}\n")
 
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
@@ -168,6 +179,13 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode):
                                     line = 'wflag\t' + line
                                 else:
                                     # WFLAG does not support on repeat line
+                                    pass
+                        elif Mode == 'Call Label':
+                            if RepeatCnt == 1:
+                                if CheckInRange(CycleNum, CycleRange):
+                                    line = 'call ' + UserString + '\t' + line # Call Label name
+                                else:
+                                    # Call Label does not support on repeat line
                                     pass
 
                     NewATPfile.write(line)
@@ -453,7 +471,7 @@ def main11():
     input('Press Enter key to exit!')
 
 
-def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
+def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString):
     # ATPFiles = []
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
@@ -485,6 +503,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode):
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
             elif Mode == 'WFLAG':
                 EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+            elif Mode == 'Call Label':
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, UserString)
             else:
                 print("Error: Wrong Choice !!!")
         else:

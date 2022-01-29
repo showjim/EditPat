@@ -72,7 +72,7 @@ class DemoClass(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG']
+        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG', 'Call Label']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=27)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
@@ -91,11 +91,19 @@ class DemoClass(tk.Tk):
         self.contents6.set("[Please Select Time Mode]")
         self.cmb2.config(textvariable=self.contents6)
 
-        # Final, button
+        # Step 6, button
         self.btn = tk.Button(topframe, text='Generate', command=self.SayHello)
         # self.btn.pack()
         self.btn.grid(row=4, column=0, columnspan=2)
 
+        # Step 7. Label Name Entry
+        self.ety2 = tk.Entry(topframe, width=30)
+        # self.ety.pack()
+        self.ety2.grid(row=2, column=1)
+
+        self.contents7 = StringVar()
+        self.contents7.set("Please Enter the User String")
+        self.ety2.config(textvariable=self.contents7)
         # self.tk.mainloop()
 
     def SayHello(self):  # (, ATPFile, CSVFile, PinName, Mode):
@@ -106,7 +114,8 @@ class DemoClass(tk.Tk):
         PinName = self.ety.get()
         Mode = self.cmb.get()
         TimeMode = self.cmb2.get()
-        main4(ATPFile, CSVFile, PinName, Mode, TimeMode)
+        UserString = self.ety2.get()
+        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString)
 
     def CallATPFile(self):
         global ATPfilename
