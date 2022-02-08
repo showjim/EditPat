@@ -8,7 +8,7 @@ import os
 import re
 
 
-def EditPattern(PinName, something, CycleRange, Mode, timemode, UserString = ''):
+def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
@@ -27,8 +27,11 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, UserString = '')
     CycleNum = 0
     RepeatCnt = 0
     # remove all "repeat" opcode first
-    RemoveRepeat(something, timemode)
-    RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
+    if IndexMode == 'Cycle':
+        RemoveRepeat(something, timemode)
+        RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
+    else:
+        RemoveRepeatFile = something
     with open(otherthing, mode='w') as NewATPfile:
         with open(RemoveRepeatFile) as ATPfile:
         # with open(something) as ATPfile:
@@ -79,7 +82,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, UserString = '')
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
-                        if Index == 0:
+                        if Index == 0 or Index == -1:
                             print('Error: Cannot find pinname')
                         NewATPfile.write(line)
 
@@ -189,13 +192,17 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, UserString = '')
                                     pass
 
                     NewATPfile.write(line)
-                    # CycleNum += 1
-                    CycleNum += RepeatCnt
+
+                    if IndexMode == 'Cycle':
+                        CycleNum += RepeatCnt
+                    else:
+                        CycleNum += 1
 
                 if len(line) == 0:
                     break
         if os.path.exists(RemoveRepeatFile):
-            os.remove(RemoveRepeatFile)
+            if IndexMode == 'Cycle':
+                os.remove(RemoveRepeatFile)
         else:
             print("The file " + RemoveRepeatFile + " does not exist")
 
@@ -245,7 +252,7 @@ def CheckInSameRange(CycleNumList, CycleRange):
 def FindPinIndex(PinName, STRLine):
     # pattern = re.compile(r"\,\s*(.+)\)")
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
-    pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)\s*])')
+    pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)])')
     tmparray = re.findall(pattern, STRLine)
     Index = -1
     for x in range(len(tmparray)):
@@ -471,7 +478,7 @@ def main11():
     input('Press Enter key to exit!')
 
 
-def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString):
+def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode):
     # ATPFiles = []
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
@@ -492,19 +499,19 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString):
         j = InList(tmpFileName, ATPFiles)
         if j >= 0:
             if Mode == 'DSSC Capture':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'DSSC Source':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'CMEM/HRAM Capture':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Expand Pattern':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Compress Pattern':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'WFLAG':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Call Label':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, UserString)
+                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode, UserString)
             else:
                 print("Error: Wrong Choice !!!")
         else:

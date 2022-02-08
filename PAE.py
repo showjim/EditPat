@@ -50,12 +50,12 @@ class DemoClass(tk.Tk):
         # self.ety3.pack()
         self.ety3.grid(row=1, column=0)
 
-        self.btn2 = tk.Button(
+        self.btn3 = tk.Button(
             topframe,
             text='Select CSV Files',
             command=self.CallCSVFile)
         # self.btn2.pack()
-        self.btn2.grid(row=1, column=1)
+        self.btn3.grid(row=1, column=1)
 
         self.contents3 = StringVar()
         self.contents3.set("Please Select CSV File")
@@ -82,29 +82,68 @@ class DemoClass(tk.Tk):
         self.cmb.config(textvariable=self.contents5)
 
         # Step 5. Please choose time mode
-        CmbList = ['Single', 'Dual']
-        self.cmb2 = ttk.Combobox(topframe, values=CmbList, width=27)
-        # self.cmb.pack()
-        self.cmb2.grid(row=3, column=1)
+        # CmbList = ['Single', 'Dual']
+        # self.cmb2 = ttk.Combobox(topframe, values=CmbList, width=27)
+        # # self.cmb.pack()
+        # self.cmb2.grid(row=3, column=1)
+        #
+        # self.contents6 = StringVar()
+        # self.contents6.set("[Please Select Time Mode]")
+        # self.cmb2.config(textvariable=self.contents6)
 
-        self.contents6 = StringVar()
-        self.contents6.set("[Please Select Time Mode]")
-        self.cmb2.config(textvariable=self.contents6)
+        self.check_box_Label2 = ttk.Label(topframe, text='Time Mode:')
+        self.check_box_var2 = StringVar()  # tk.IntVar()
+        self.check_box3 = ttk.Radiobutton(topframe,
+                                          text=u'Single',
+                                          variable=self.check_box_var2,
+                                          value='Single',
+                                          command=self.on_radiobox_changed)
+        self.check_box4 = ttk.Radiobutton(topframe,
+                                          text=u'Dual',
+                                          variable=self.check_box_var2,
+                                          value='Dual',
+                                          command=self.on_radiobox_changed)
+        self.check_box_var2.set('Single')
+        self.check_box_Label2.grid(row=4, column=0, sticky='W')
+        self.check_box3.grid(row=4, column=1, sticky='W')
+        self.check_box4.grid(row=4, column=1, sticky='E')
 
         # Step 6, button
         self.btn = tk.Button(topframe, text='Generate', command=self.SayHello)
         # self.btn.pack()
-        self.btn.grid(row=4, column=0, columnspan=2)
+        self.btn.grid(row=6, column=0, columnspan=2)
 
         # Step 7. Label Name Entry
         self.ety2 = tk.Entry(topframe, width=30)
         # self.ety.pack()
-        self.ety2.grid(row=2, column=1)
+        self.ety2.grid(row=3, column=1)
 
         self.contents7 = StringVar()
         self.contents7.set("Please Enter the User String")
         self.ety2.config(textvariable=self.contents7)
         # self.tk.mainloop()
+
+        # Step 8. Please choose index mode
+        self.check_box_Label = ttk.Label(topframe, text='Index Mode:')
+        self.check_box_var1 = StringVar() #tk.IntVar()
+        self.check_box1 = ttk.Radiobutton(topframe,
+                                         text=u'Cycle',
+                                         variable = self.check_box_var1,
+                                         value = 'Cycle',
+                                         command=self.on_radiobox_changed)
+        self.check_box2 = ttk.Radiobutton(topframe,
+                                          text=u'Vector',
+                                          variable=self.check_box_var1,
+                                          value='Vector',
+                                          command=self.on_radiobox_changed)
+        self.check_box_var1.set('Cycle')
+        self.check_box_Label.grid(row=5, column=0, sticky='W')
+        self.check_box1.grid(row=5, column=1, sticky='W')
+        self.check_box2.grid(row=5, column=1, sticky='E')
+
+
+    def on_radiobox_changed(self):
+        print(self.check_box_var1.get())
 
     def SayHello(self):  # (, ATPFile, CSVFile, PinName, Mode):
         ATPFile = ATPfilename
@@ -113,9 +152,10 @@ class DemoClass(tk.Tk):
         # Dir = FolderPath
         PinName = self.ety.get()
         Mode = self.cmb.get()
-        TimeMode = self.cmb2.get()
+        TimeMode = self.check_box_var2.get() #self.cmb2.get()
         UserString = self.ety2.get()
-        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString)
+        IndexMode = self.check_box_var1.get()
+        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode)
 
     def CallATPFile(self):
         global ATPfilename
