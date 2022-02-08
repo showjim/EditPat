@@ -76,7 +76,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                 NewATPfile.write("instruments = {\n")
                                 for pin in PinNameList:
                                     NewATPfile.write(
-                                        "{0}:DCVS 1:;\n".format(pin))
+                                        "{0}:DCVS 1;\n".format(pin))
                                 NewATPfile.write("}\n")
 
                     # check the index of pin in pin head
