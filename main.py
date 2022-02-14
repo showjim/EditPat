@@ -376,7 +376,7 @@ def AddReapt(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.find(r"start_label") != -1:  # check the header part
+                    if headerline.strip().startswith(r"{"): #headerline.find(r"start_label") != -1:  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
