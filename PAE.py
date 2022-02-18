@@ -11,7 +11,7 @@ from tkinter import messagebox
 from argparse import FileType
 from main import *
 
-version = 'V1.9.5'
+version = 'V1.9.6'
 
 class DemoClass(tk.Tk):
 

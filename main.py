@@ -252,6 +252,7 @@ def CheckInSameRange(CycleNumList, CycleRange):
 def FindPinIndex(PinName, STRLine):
     # pattern = re.compile(r"\,\s*(.+)\)")
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
+    STRLine = STRLine.replace(' ', '')
     pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)])')
     tmparray = re.findall(pattern, STRLine)
     Index = -1
