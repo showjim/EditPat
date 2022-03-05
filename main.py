@@ -436,16 +436,6 @@ def GetRepeatCnt(line):
         return 1
 
 
-def Trim(mystr):
-    x = ""
-    for tmpstr in mystr:
-        if tmpstr == "":
-            continue
-        else:
-            x = x + tmpstr
-    return x
-
-
 def cmp(a, b):  # compare two lists
     listlena = len(a)
     listlenb = len(b)
