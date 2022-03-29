@@ -337,10 +337,8 @@ def RemoveRepeat(something, timemode):
                         # i = 0
                         # j = len('repeat ' + str(RepeatCnt))
                         # line = line.replace('repeat ' + str(RepeatCnt), ' ' * j)
-                        line[-1] = line[-1].replace('repeat',
-                                                    ' ' * len('repeat'))
-                        line[-1] = line[-1].replace(str(RepeatCnt),
-                                                    ' ' * len(str(RepeatCnt)))
+                        line[-1] = line[-1].replace('repeat',  ' ' * len('repeat'), 1)
+                        line[-1] = line[-1].replace(str(RepeatCnt), ' ' * len(str(RepeatCnt)), 1)
                         for j in range(RepeatCnt):
                             for i in range(len(line)):
                                 NewATPfile.write(line[i])
