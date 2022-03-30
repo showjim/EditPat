@@ -387,10 +387,11 @@ def AddReapt(something, timemode):
 
                         while True:
                             tmpLine = ATPfile.readline()
-                            LineIndex += 1
+                            # LineIndex += 1
                             if tmpLine.strip().startswith(r'//'):
                                 continue
                             else:
+                                LineIndex += 1
                                 break
                         line.append(tmpLine)
                         # LineIndex += 1
