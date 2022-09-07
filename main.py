@@ -82,7 +82,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
-                        if Index == 0 or Index == -1:
+                        if 0 in Index:
                             print('Error: Cannot find pinname')
                         NewATPfile.write(line)
 
@@ -94,19 +94,21 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                     if CycleNum == 0:
                         # find the modify pin position
                         ModifyIndex = 0
-                        CountNum = 0
 
                         pattern = re.compile(r"> *\S+")
                         StartSearchPos = re.search(pattern, line).end()
 
-                        ModifyIndex = StartSearchPos
-                        for x in line[StartSearchPos:]:
-
-                            if not x.isspace():
-                                CountNum += 1
-                            if Index + 1 == CountNum:
-                                break
-                            ModifyIndex += 1
+                        ModifyIndexList = []
+                        for i in range(len(Index)):
+                            ModifyIndex = StartSearchPos
+                            CountNum = 0
+                            for x in line[StartSearchPos:]:
+                                if not x.isspace():
+                                    CountNum += 1
+                                if Index[i] + 1 == CountNum:
+                                    ModifyIndexList.append(ModifyIndex)
+                                    break
+                                ModifyIndex += 1
 
                     # add DigSrc Signaal
                     if (CycleNum == 1) and (Mode == 'DSSC Source'):
@@ -134,46 +136,54 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    line = line[0:ModifyIndex] + \
-                                           "V" + line[ModifyIndex + 1:]
-                                    line = "(({0}):DigCap = Store)".format(
-                                        PinName) + line
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    line = "(({0}):DigCap = Store)".format(PinName) + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    line = line[0:ModifyIndex] + \
-                                           "V" + line[ModifyIndex + 1:]
-                                    line = "(({0}):DigCap = Store)".format(
-                                        PinName) + " " + line
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    line = "(({0}):DigCap = Store)".format(PinName) + " " + line
 
                         elif Mode == 'DSSC Source':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    line = line[0:ModifyIndex] + \
-                                           "D" + line[ModifyIndex + 1:]
-                                    line = "(({0}):DigSrc = Send)".format(
-                                        PinName) + line
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                            print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    line = "(({0}):DigSrc = Send)".format(PinName) + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    line = line[0:ModifyIndex] + \
-                                           "D" + line[ModifyIndex + 1:]
-                                    line = "(({0}):DigSrc = Send)".format(
-                                        PinName) + " " + line
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                            print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    line = "(({0}):DigSrc = Send)".format(PinName) + " " + line
 
                         elif Mode == 'CMEM/HRAM Capture':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    line = line[0:ModifyIndex] + \
-                                        "V" + line[ModifyIndex + 1:]
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "stv\t" + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    line = line[0:ModifyIndex] + \
-                                           "V" + line[ModifyIndex + 1:]
+                                    for ModifyIndex in ModifyIndexList:
+                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = line.replace('repeat', 'stv,repeat')
 
                         elif Mode == 'WFLAG':
@@ -249,16 +259,21 @@ def CheckInSameRange(CycleNumList, CycleRange):
     return False
 
 
-def FindPinIndex(PinName, STRLine):
+def FindPinIndex(PinNames, STRLine):
     # pattern = re.compile(r"\,\s*(.+)\)")
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
+    PinName = PinNames.split(",")
     STRLine = STRLine.replace(' ', '')
     pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)])')
     tmparray = re.findall(pattern, STRLine)
-    Index = -1
-    for x in range(len(tmparray)):
-        if tmparray[x] == PinName:
-            Index = x
+    Index = [] #-1
+    for i in range(len(PinName)):
+        for x in range(len(tmparray)):
+            if tmparray[x] == PinName[i]:
+                Index.append(x)
+    if len(Index)!=len(PinName):
+        Index = []
+        print("Error: Cannot find all given pins")
     return Index
 
 
