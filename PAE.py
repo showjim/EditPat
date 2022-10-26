@@ -141,6 +141,20 @@ class DemoClass(tk.Tk):
         self.check_box1.grid(row=5, column=1, sticky='W')
         self.check_box2.grid(row=5, column=1, sticky='E')
 
+        # output log part
+        right_bar = tk.Scrollbar(topframe, orient=tk.VERTICAL)
+        bottom_bar = tk.Scrollbar(topframe, orient=tk.HORIZONTAL)
+        self.textbox = tk.Text(topframe, yscrollcommand=right_bar.set, xscrollcommand=bottom_bar.set)
+        right_bar.grid(row=7, column=3, sticky="ns")
+        bottom_bar.grid(row=8, column=0, columnspan=2, sticky="we")
+        self.textbox.grid(row=7, column=0, columnspan=2)
+        right_bar.config(command=self.textbox.yview)
+        bottom_bar.config(command=self.textbox.xview)
+
+    def put_data_log(self, data_log):
+        self.textbox.insert(tk.END, data_log + '\n')
+        self.textbox.see(tk.END)
+        self.textbox.update()
 
     def on_radiobox_changed(self):
         print(self.check_box_var1.get())
@@ -155,7 +169,8 @@ class DemoClass(tk.Tk):
         TimeMode = self.check_box_var2.get() #self.cmb2.get()
         UserString = self.ety2.get()
         IndexMode = self.check_box_var1.get()
-        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode)
+        textout = self.put_data_log
+        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode, textout)
 
     def CallATPFile(self):
         global ATPfilename

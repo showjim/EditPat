@@ -8,7 +8,7 @@ import os
 import re
 
 
-def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
+def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
@@ -83,6 +83,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                     elif line.find("$tset") != -1:
                         Index = FindPinIndex(PinName, line)
                         if 0 in Index:
+                            textoutwin('Error: Cannot find pinname')
                             print('Error: Cannot find pinname')
                         NewATPfile.write(line)
 
@@ -139,6 +140,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "(({0}):DigCap = Store)".format(PinName) + line
                             else:
@@ -147,6 +149,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "(({0}):DigCap = Store)".format(PinName) + " " + line
 
@@ -157,6 +160,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "(({0}):DigSrc = Send)".format(PinName) + line
                             else:
@@ -165,6 +169,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "(({0}):DigSrc = Send)".format(PinName) + " " + line
 
@@ -175,6 +180,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = "stv\t" + line
                             else:
@@ -183,6 +189,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
                                     for ModifyIndex in ModifyIndexList:
                                         line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                         if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                             print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
                                     line = line.replace('repeat', 'stv,repeat')
 
@@ -214,6 +221,7 @@ def EditPattern(PinName, something, CycleRange, Mode, timemode, IndexMode, UserS
             if IndexMode == 'Cycle':
                 os.remove(RemoveRepeatFile)
         else:
+            textoutwin("The file " + RemoveRepeatFile + " does not exist")
             print("The file " + RemoveRepeatFile + " does not exist")
 
 
@@ -483,7 +491,7 @@ def main11():
     input('Press Enter key to exit!')
 
 
-def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode):
+def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, textoutwin):
     # ATPFiles = []
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
@@ -495,6 +503,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode):
         timemode = '2'
     CycleRanges = []
     if len(CSVFiles) > 1:
+        textoutwin("Error: Only ONE CSV file supported !!!")
         print("Error: Only ONE CSV file supported !!!")
         return
     CycleRanges = ReadCSV(CSVFiles[0])
@@ -504,23 +513,25 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode):
         j = InList(tmpFileName, ATPFiles)
         if j >= 0:
             if Mode == 'DSSC Capture':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode )
             elif Mode == 'DSSC Source':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'CMEM/HRAM Capture':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Expand Pattern':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Compress Pattern':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'WFLAG':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
             elif Mode == 'Call Label':
-                EditPattern(PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode, UserString)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode, UserString)
             else:
+                textoutwin("Error: Wrong Choice !!!")
                 print("Error: Wrong Choice !!!")
         else:
-            print("Error: Cannot find atp file: " + tmpFileName)
+            textoutwin("Warning: Cannot find atp file: " + tmpFileName)
+            print("Warning: Cannot find atp file: " + tmpFileName)
 
 
 def GetFiles(files_array, dirname, extname):
