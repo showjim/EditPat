@@ -29,14 +29,14 @@ class DemoClass(tk.Tk):
         contentframe.pack(side=tk.TOP)
 
         # Step 1. Please enter ATP file path and name:
-        self.ety2 = tk.Entry(topframe, width=30)
+        self.ety2 = tk.Entry(topframe, width=40)
         # self.ety2.pack()
         self.ety2.grid(row=0, column=0)
 
         self.btn2 = tk.Button(
             topframe,
             text='Select ATP Files',
-            command=self.CallATPFile)
+            command=self.CallATPFile, width=30)
         # self.btn2.pack()
         self.btn2.grid(row=0, column=1)
 
@@ -46,14 +46,14 @@ class DemoClass(tk.Tk):
         # ATPFile = self.contents2.get()
 
         # Step 2. Please enter CSV file path and name:
-        self.ety3 = tk.Entry(topframe, width=30)
+        self.ety3 = tk.Entry(topframe, width=40)
         # self.ety3.pack()
         self.ety3.grid(row=1, column=0)
 
         self.btn3 = tk.Button(
             topframe,
             text='Select CSV Files',
-            command=self.CallCSVFile)
+            command=self.CallCSVFile, width=30)
         # self.btn2.pack()
         self.btn3.grid(row=1, column=1)
 
@@ -63,7 +63,7 @@ class DemoClass(tk.Tk):
         # CSVFile = self.contents3.get()
 
         # Step 3. Pin Name Entry
-        self.ety = tk.Entry(topframe, width=30)
+        self.ety = tk.Entry(topframe, width=40)
         # self.ety.pack()
         self.ety.grid(row=2, column=0)
 
@@ -73,7 +73,7 @@ class DemoClass(tk.Tk):
 
         # Step 4. Please choose function
         CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG', 'Call Label']
-        self.cmb = ttk.Combobox(topframe, values=CmbList, width=27)
+        self.cmb = ttk.Combobox(topframe, values=CmbList, width=37)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
 
@@ -91,7 +91,7 @@ class DemoClass(tk.Tk):
         # self.contents6.set("[Please Select Time Mode]")
         # self.cmb2.config(textvariable=self.contents6)
 
-        self.check_box_Label2 = ttk.Label(topframe, text='Time Mode:')
+        self.check_box_Label2 = ttk.Label(topframe, text='Time Mode:\t\t')
         self.check_box_var2 = StringVar()  # tk.IntVar()
         self.check_box3 = ttk.Radiobutton(topframe,
                                           text=u'Single',
@@ -104,7 +104,7 @@ class DemoClass(tk.Tk):
                                           value='Dual',
                                           command=self.on_radiobox_changed)
         self.check_box_var2.set('Single')
-        self.check_box_Label2.grid(row=4, column=0, sticky='W')
+        self.check_box_Label2.grid(row=4, column=0, sticky='E')
         self.check_box3.grid(row=4, column=1, sticky='W')
         self.check_box4.grid(row=4, column=1, sticky='E')
 
@@ -114,7 +114,7 @@ class DemoClass(tk.Tk):
         self.btn.grid(row=6, column=0, columnspan=2)
 
         # Step 7. Label Name Entry
-        self.ety2 = tk.Entry(topframe, width=30)
+        self.ety2 = tk.Entry(topframe, width=40)
         # self.ety.pack()
         self.ety2.grid(row=3, column=1)
 
@@ -124,7 +124,7 @@ class DemoClass(tk.Tk):
         # self.tk.mainloop()
 
         # Step 8. Please choose index mode
-        self.check_box_Label = ttk.Label(topframe, text='Index Mode:')
+        self.check_box_Label = ttk.Label(topframe, text='Index Mode:\t\t')
         self.check_box_var1 = StringVar() #tk.IntVar()
         self.check_box1 = ttk.Radiobutton(topframe,
                                          text=u'Cycle',
@@ -137,7 +137,7 @@ class DemoClass(tk.Tk):
                                           value='Vector',
                                           command=self.on_radiobox_changed)
         self.check_box_var1.set('Cycle')
-        self.check_box_Label.grid(row=5, column=0, sticky='W')
+        self.check_box_Label.grid(row=5, column=0, sticky='E')
         self.check_box1.grid(row=5, column=1, sticky='W')
         self.check_box2.grid(row=5, column=1, sticky='E')
 
