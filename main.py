@@ -104,6 +104,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             ModifyIndex = StartSearchPos
                             CountNum = 0
                             for x in line[StartSearchPos:]:
+                                a = re.findall("(?<=\s)([01HLXMVD\-\.])(?=[\s;])", line)
                                 if not x.isspace():
                                     CountNum += 1
                                 if Index[i] + 1 == CountNum:
@@ -137,61 +138,115 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = "(({0}):DigCap = Store)".format(PinName) + line
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "V"
+                                    line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                    #         textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = "(({0}):DigCap = Store)".format(PinName) + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = "(({0}):DigCap = Store)".format(PinName) + " " + line
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "V"
+                                    line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                    #         textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = "(({0}):DigCap = Store)".format(PinName) + " " + line
 
                         elif Mode == 'DSSC Source':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
-                                            textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = "(({0}):DigSrc = Send)".format(PinName) + line
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "D"
+                                    line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                    #         textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = "(({0}):DigSrc = Send)".format(PinName) + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
-                                            textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = "(({0}):DigSrc = Send)".format(PinName) + " " + line
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "D"
+                                    line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
+                                    #         textoutwin("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Compare data found in DigSrc, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = "(({0}):DigSrc = Send)".format(PinName) + " " + line
 
                         elif Mode == 'CMEM/HRAM Capture':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = "stv\t" + line
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "V"
+                                    line = "stv\t" + " ".join(line_list) + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                    #         textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = "stv\t" + line
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
-                                    for ModifyIndex in ModifyIndexList:
-                                        line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
-                                        if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                            print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
-                                    line = line.replace('repeat', 'stv,repeat')
+                                    for k in Index:
+                                        line_list = line.split()
+                                        start_index = line_list.index(">")
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        else:
+                                            line_list[k + start_index + 1] = "V"
+                                    line = " ".join(line_list).replace('repeat', 'stv,repeat') + "\n"
+                                    # for ModifyIndex in ModifyIndexList:
+                                    #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
+                                    #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
+                                    #         textoutwin("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    #         print("Warning: Drive data found in DigCap, line " + LineIndex + ", and pin data index" + ModifyIndex)
+                                    # line = line.replace('repeat', 'stv,repeat')
 
                         elif Mode == 'WFLAG':
                             if RepeatCnt == 1:
@@ -512,6 +567,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
         tmpFileName = key  # CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
         j = InList(tmpFileName, ATPFiles)
         if j >= 0:
+            textoutwin("Info: Start convert file: " + ATPFiles[j])
+            print("Info: start convert file: +" + ATPFiles[j])
             if Mode == 'DSSC Capture':
                 EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode )
             elif Mode == 'DSSC Source':
@@ -529,6 +586,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
             else:
                 textoutwin("Error: Wrong Choice !!!")
                 print("Error: Wrong Choice !!!")
+            textoutwin("Info: Done conversion")
+            print("Info: Done conversion")
         else:
             textoutwin("Warning: Cannot find atp file: " + tmpFileName)
             print("Warning: Cannot find atp file: " + tmpFileName)
