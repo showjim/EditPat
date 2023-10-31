@@ -20,6 +20,10 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
         AddReapt(something, timemode)
         return
 
+    if Mode == 'Remove Opcode':
+        RemoveOpcode(something, UserString)
+        return
+
     # CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
 
@@ -339,30 +343,19 @@ def FindPinIndex(PinNames, STRLine):
         print("Error: Cannot find all given pins")
     return Index
 
+def RemoveOpcode(something, UserString):
+    otherthing = something.replace(r'.atp', r'_RemoveOpcode.atp')
+    with open(otherthing, mode='w') as NewATPfile:
+        with open(something) as ATPfile:
+            while True:
+                tmpLine = ATPfile.readline()
+                if len(tmpLine) == 0:
+                    break
+                if tmpLine.strip().startswith(UserString):
+                    tmpLine = tmpLine.replace(UserString, '')
+                NewATPfile.write(tmpLine)
 
-# def RemoveRepeat(something):
-#     otherthing = os.path.realpath('new_RemoveRepeat.atp')
-#
-#     with open(otherthing, mode='w') as NewATPfile:
-#         with open(something) as ATPfile:
-#
-#             for line in ATPfile:
-#                 RepeatCnt = 1
-#                 p = re.compile(r'(?<=repeat)\s+\d+')
-#                 m = re.search(p, line)
-#
-#                 if m:
-#                     RepeatCnt = int(m.group())
-#
-#                 if RepeatCnt > 1:
-#                     # j = line.find('>')
-#                     # j = len('repeat ' + str(RepeatCnt))
-#                     line = line.replace('repeat', ' ' * len('repeat'))
-#                     line = line.replace(str(RepeatCnt), ' ' * len(str(RepeatCnt)))
-#                     for i in range(0, RepeatCnt):
-#                         NewATPfile.write(line)
-#                 else:
-#                     NewATPfile.write(line)
+
 def RemoveRepeat(something, timemode):
     otherthing = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('new_RemoveRepeat.atp')
 
@@ -551,7 +544,8 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
     # GetFiles(CSVFiles, Dir, ".csv")
-
+    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+               'Call Label', 'Remove Opcode']
     if TimeMode == 'Single':
         timemode = '1'
     elif TimeMode == 'Dual':
@@ -569,19 +563,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
         if j >= 0:
             textoutwin("Info: Start convert file: " + ATPFiles[j])
             print("Info: start convert file: +" + ATPFiles[j])
-            if Mode == 'DSSC Capture':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode )
-            elif Mode == 'DSSC Source':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
-            elif Mode == 'CMEM/HRAM Capture':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
-            elif Mode == 'Expand Pattern':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
-            elif Mode == 'Compress Pattern':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
-            elif Mode == 'WFLAG':
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode)
-            elif Mode == 'Call Label':
+            if Mode in CmbList:
                 EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode, UserString)
             else:
                 textoutwin("Error: Wrong Choice !!!")
