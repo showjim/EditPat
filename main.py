@@ -3,9 +3,7 @@ Created on Dec 8, 2015
 
 @author: zhouchao
 '''
-import csv
-import os
-import re
+import csv, os, re, gzip
 
 
 def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
@@ -36,8 +34,8 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
         RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
     else:
         RemoveRepeatFile = something
-    with open(otherthing, mode='w') as NewATPfile:
-        with open(RemoveRepeatFile) as ATPfile:
+    with openfile(otherthing, mode='w') as NewATPfile:
+        with openfile(RemoveRepeatFile) as ATPfile:
         # with open(something) as ATPfile:
             while True:
                 line = ATPfile.readline()
@@ -297,7 +295,7 @@ def Check_tset_line(tset_list, line):
 def ReadCSV(something):
     CycleRange = {}
     # x=[]
-    with open(something) as f:
+    with openfile(something) as f:
         f_csv = csv.reader(f)
         for row in f_csv:
             if len(row) > 0:
@@ -345,8 +343,8 @@ def FindPinIndex(PinNames, STRLine):
 
 def RemoveOpcode(something, UserString):
     otherthing = something.replace(r'.atp', r'_RemoveOpcode.atp')
-    with open(otherthing, mode='w') as NewATPfile:
-        with open(something) as ATPfile:
+    with openfile(otherthing, mode='w') as NewATPfile:
+        with openfile(something) as ATPfile:
             while True:
                 tmpLine = ATPfile.readline()
                 if len(tmpLine) == 0:
@@ -355,6 +353,11 @@ def RemoveOpcode(something, UserString):
                     tmpLine = tmpLine.replace(UserString, '')
                 NewATPfile.write(tmpLine)
 
+def openfile(filename, mode='r'):
+    if filename.endswith('.gz'):
+        return gzip.open(filename, mode + 't') # "t" means open gz as string
+    else:
+        return open(filename, mode)
 
 def RemoveRepeat(something, timemode):
     otherthing = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('new_RemoveRepeat.atp')
@@ -372,9 +375,8 @@ def RemoveRepeat(something, timemode):
         linenum = 2
 
     # /Users/Jerry/OneDrive/Python/EditRepeatTool/test1.txt
-    with open(otherthing, mode='w') as NewATPfile:
-        with open(something) as ATPfile:
-
+    with openfile(otherthing, mode='w') as NewATPfile:
+        with openfile(something) as ATPfile:
             while True:
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
@@ -440,8 +442,8 @@ def AddReapt(something, timemode):
     elif timemode == '2':
         linenum = 2
 
-    with open(otherthing, mode='w') as NewATPfile:
-        with open(something) as ATPfile:
+    with openfile(otherthing, mode='w') as NewATPfile:
+        with openfile(something) as ATPfile:
             while True:
                 line = []  # initial line for dual mode
                 if not Boby_Flag:

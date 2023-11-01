@@ -11,7 +11,7 @@ from tkinter import messagebox
 from argparse import FileType
 from main import *
 
-version = 'V1.10.1'
+version = 'V1.10.2'
 
 class DemoClass(tk.Tk):
 
@@ -175,7 +175,7 @@ class DemoClass(tk.Tk):
     def CallATPFile(self):
         global ATPfilename
         ATPfilename = tk.filedialog.askopenfilenames(
-            filetypes=[('ATP File', '*.atp'), ("all", "*.*")])  #
+            filetypes=[('ATP File', '*.atp'), ('GZ File', '*.atp.gz'), ("all", "*.*")])  #
         self.contents2.set(ATPfilename)
         # print(filename)
 
