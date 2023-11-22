@@ -7,20 +7,21 @@ import csv, os, re, gzip
 
 
 def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
+    result = False
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
     if Mode == 'Expand Pattern':
         RemoveRepeat(something, timemode)
         RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
-        return
+        return result
     if Mode == 'Compress Pattern':
         AddReapt(something, timemode)
-        return
+        return result
 
     if Mode == 'Remove Opcode':
         RemoveOpcode(something, UserString)
-        return
+        return result
 
     # CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
@@ -280,6 +281,9 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
         else:
             textoutwin("The file " + RemoveRepeatFile + " does not exist")
             print("The file " + RemoveRepeatFile + " does not exist")
+    textoutwin("Info: Done conversion: " + something)
+    print("Info: Done conversion: " + something)
+    return result
 
 
 def Check_tset_line(tset_list, line):

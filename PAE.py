@@ -8,25 +8,36 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
-from argparse import FileType
-from main import *
+import traceback
+from main import ReadCSV, EditPattern, InList, main4
+import multiprocessing
+from multiprocessing import Pool, Manager
+multiprocessing.freeze_support()
 
-version = 'V1.10.2'
+version = 'V1.10.3'
 
 class DemoClass(tk.Tk):
 
     def __init__(self):
         super().__init__()  # 有点相当于tk.Tk()
+        self.ATPfilename = []
+        self.CSVfilename = []
         self.createWidgets()
 
     def createWidgets(self):
         self.title('Pattern Auto Edit Tool ' + version)
-        self.columnconfigure(0, minsize=50)
+        # used to set each widget to resize together
+        self.rowconfigure(0, weight=0, minsize=30)
+        self.rowconfigure(1, weight=1, minsize=50)
+        self.columnconfigure(0, weight=1, minsize=50)
+        self.columnconfigure(1, weight=0)
 
-        topframe = tk.Frame(self, height=80)
-        contentframe = tk.Frame(self)
-        topframe.pack(side=tk.TOP)
-        contentframe.pack(side=tk.TOP)
+        topframe = tk.Frame(self, height=80, borderwidth=1)
+        contentframe = tk.Frame(self, height=80, borderwidth=1)
+        contentframe.rowconfigure(0, weight=1)
+        contentframe.columnconfigure(0, weight=1)
+        topframe.grid(row=0, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
+        contentframe.grid(row=1, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
 
         # Step 1. Please enter ATP file path and name:
         self.ety2 = tk.Entry(topframe, width=40)
@@ -72,7 +83,8 @@ class DemoClass(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture','Expand Pattern', 'Compress Pattern', 'WFLAG', 'Call Label', 'Remove Opcode']
+        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+                   'Call Label', 'Remove Opcode']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=37)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
@@ -109,7 +121,7 @@ class DemoClass(tk.Tk):
         self.check_box4.grid(row=4, column=1, sticky='E')
 
         # Step 6, button
-        self.btn = tk.Button(topframe, text='Generate', command=self.SayHello)
+        self.btn = tk.Button(topframe, text='Generate', command=self.SayHello_MultProcess)  # self.SayHello)
         # self.btn.pack()
         self.btn.grid(row=6, column=0, columnspan=2)
 
@@ -125,12 +137,12 @@ class DemoClass(tk.Tk):
 
         # Step 8. Please choose index mode
         self.check_box_Label = ttk.Label(topframe, text='Index Mode:\t\t')
-        self.check_box_var1 = StringVar() #tk.IntVar()
+        self.check_box_var1 = StringVar()  # tk.IntVar()
         self.check_box1 = ttk.Radiobutton(topframe,
-                                         text=u'Cycle',
-                                         variable = self.check_box_var1,
-                                         value = 'Cycle',
-                                         command=self.on_radiobox_changed)
+                                          text=u'Cycle',
+                                          variable=self.check_box_var1,
+                                          value='Cycle',
+                                          command=self.on_radiobox_changed)
         self.check_box2 = ttk.Radiobutton(topframe,
                                           text=u'Vector',
                                           variable=self.check_box_var1,
@@ -142,12 +154,13 @@ class DemoClass(tk.Tk):
         self.check_box2.grid(row=5, column=1, sticky='E')
 
         # output log part
-        right_bar = tk.Scrollbar(topframe, orient=tk.VERTICAL)
-        bottom_bar = tk.Scrollbar(topframe, orient=tk.HORIZONTAL)
-        self.textbox = tk.Text(topframe, yscrollcommand=right_bar.set, xscrollcommand=bottom_bar.set)
-        right_bar.grid(row=7, column=3, sticky="ns")
-        bottom_bar.grid(row=8, column=0, columnspan=2, sticky="we")
-        self.textbox.grid(row=7, column=0, columnspan=2)
+        right_bar = tk.Scrollbar(contentframe, orient=tk.VERTICAL)
+        bottom_bar = tk.Scrollbar(contentframe, orient=tk.HORIZONTAL)
+        self.textbox = tk.Text(contentframe, yscrollcommand=right_bar.set, xscrollcommand=bottom_bar.set)
+        self.textbox.config()
+        self.textbox.grid(row=0, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
+        right_bar.grid(row=0, column=1, sticky=tk.S + tk.N)
+        bottom_bar.grid(row=1, column=0, sticky=tk.W + tk.E)
         right_bar.config(command=self.textbox.yview)
         bottom_bar.config(command=self.textbox.xview)
 
@@ -160,30 +173,111 @@ class DemoClass(tk.Tk):
         print(self.check_box_var1.get())
 
     def SayHello(self):  # (, ATPFile, CSVFile, PinName, Mode):
-        ATPFile = ATPfilename
+        ATPFile = self.ATPfilename
         # sss =  self.contents2.get()
-        CSVFile = CSVfilename
+        CSVFile = self.CSVfilename
         # Dir = FolderPath
         PinName = self.ety.get()
         Mode = self.cmb.get()
-        TimeMode = self.check_box_var2.get() #self.cmb2.get()
+        TimeMode = self.check_box_var2.get()  # self.cmb2.get()
         UserString = self.ety2.get()
         IndexMode = self.check_box_var1.get()
         textout = self.put_data_log
         main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode, textout)
 
+    def SayHello_MultProcess(self):
+        # disable button
+        self.switchButtonState(self.btn)
+
+        # initial variables
+        ATPFiles = self.ATPfilename
+        # sss =  self.contents2.get()
+        CSVFiles = self.CSVfilename
+        # Dir = FolderPath
+        PinName = self.ety.get()
+        Mode = self.cmb.get()
+        TimeMode = self.check_box_var2.get()  # self.cmb2.get()
+        UserString = self.ety2.get()
+        IndexMode = self.check_box_var1.get()
+        textoutwin = self.put_data_log
+
+        self.queue = Manager().Queue()
+        self.counter = Manager().Value('i', 0)
+        self.pool = Pool(processes=4)  # max 4 processes
+
+        # main4 part
+        try:
+            CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+                       'Call Label', 'Remove Opcode']
+            if TimeMode == 'Single':
+                timemode = '1'
+            elif TimeMode == 'Dual':
+                timemode = '2'
+            CycleRanges = []
+            if len(CSVFiles) > 1:
+                textoutwin("Error: Only ONE CSV file supported !!!")
+                print("Error: Only ONE CSV file supported !!!")
+                return
+            CycleRanges = ReadCSV(CSVFiles[0])
+
+            self.total_tasks = 0
+            for key in CycleRanges.keys():
+                tmpFileName = key  # CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
+                j = InList(tmpFileName, ATPFiles)
+                if j >= 0:
+                    textoutwin("Info: Start convert file: " + ATPFiles[j])
+                    print("Info: start convert file: +" + ATPFiles[j])
+                    if Mode in CmbList:
+                        self.total_tasks += 1
+                        self.pool.apply_async(EditPattern, args=(
+                            self.queue.put, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode,
+                            UserString), callback=self.my_callback)
+                    else:
+                        textoutwin("Error: Wrong Choice !!!")
+                        print("Error: Wrong Choice !!!")
+                    # textoutwin("Info: Done conversion: " + ATPFiles[j])
+                    # print("Info: Done conversion: " + ATPFiles[j])
+                else:
+                    textoutwin("Warning: Cannot find atp file: " + tmpFileName)
+                    print("Warning: Cannot find atp file: " + tmpFileName)
+            self.after(500, self.update_progress)
+        except Exception:
+            error_msg = traceback.format_exc()
+            self.put_data_log(error_msg)
+            # enable button
+            self.switchButtonState(self.btn)
+
+    def my_callback(self, result):
+        self.counter.value += 1
+        if self.counter.value == self.total_tasks:
+            self.put_data_log("All tasks completed!!!")
+            # enable button
+            self.switchButtonState(self.btn)
+
+    def update_progress(self):
+        if self.queue.empty() == False:
+            message = self.queue.get()
+            self.put_data_log(message)
+        self.after(500, self.update_progress)
+
+    def switchButtonState(self, button):
+        if (button['state'] == tk.NORMAL):
+            button['state'] = tk.DISABLED
+        else:
+            button['state'] = tk.NORMAL
+
     def CallATPFile(self):
-        global ATPfilename
-        ATPfilename = tk.filedialog.askopenfilenames(
-            filetypes=[('ATP File', '*.atp'), ('GZ File', '*.atp.gz'), ("all", "*.*")])  #
-        self.contents2.set(ATPfilename)
+        # global ATPfilename
+        self.ATPfilename = tk.filedialog.askopenfilenames(
+            filetypes=[('ATP File', '*.atp;*.atp.gz'), ("all", "*.*")])  #
+        self.contents2.set(self.ATPfilename)
         # print(filename)
 
     def CallCSVFile(self):
-        global CSVfilename
-        CSVfilename = tk.filedialog.askopenfilenames(
+        # global CSVfilename
+        self.CSVfilename = tk.filedialog.askopenfilenames(
             filetypes=[('CSV File', '*.csv'), ("all", "*.*")])
-        self.contents3.set(CSVfilename)
+        self.contents3.set(self.CSVfilename)
         # print(filename)
 
     def GetFolderPath(self):
