@@ -141,14 +141,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
                                             textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "V"
+                                            line_list[start_index + 1 + k + 1] = "V"
                                     line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
@@ -159,14 +159,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
                                             textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "V"
+                                            line_list[start_index + 1 + k + 1] = "V"
                                     line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
@@ -178,15 +178,15 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         elif Mode == 'DSSC Source':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
-                                    # line[ModifyIndex] = "V"
+                                    # line[ModifyIndex] = "D"
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
                                             textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "D"
+                                            line_list[start_index + 1 + k + 1] = "D"
                                     line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
@@ -197,14 +197,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
                                             textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "D"
+                                            line_list[start_index + 1 + k + 1] = "D"
                                     line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
@@ -217,14 +217,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line[ModifyIndex] = "V"
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
                                             textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "V"
+                                            line_list[start_index + 1 + k + 1] = "V"
                                     line = "stv\t" + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
@@ -235,14 +235,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             else:
                                 CycleNumList = [CycleNum, CycleNum + RepeatCnt - 1]
                                 if CheckInSameRange(CycleNumList, CycleRange):
+                                    line_list = line.split()
                                     for k in Index:
-                                        line_list = line.split()
                                         start_index = line_list.index(">")
                                         if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
                                             textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                             print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
                                         else:
-                                            line_list[k + start_index + 1] = "V"
+                                            line_list[start_index + 1 + k + 1] = "V"
                                     line = " ".join(line_list).replace('repeat', 'stv,repeat') + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
