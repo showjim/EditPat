@@ -53,16 +53,18 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         NewATPfile.write(line)
 
                         if Mode == 'DSSC Capture':
+                            PinNameList = PinName.split(',')
                             NewATPfile.write("\n")
                             NewATPfile.write("instruments = {\n")
                             NewATPfile.write(
-                                "({0}):DigCap 1:auto_trig_enable;\n".format(PinName))
+                                "({0}):DigCap {1}:auto_trig_enable;\n".format(PinName, len(PinNameList)))
                             NewATPfile.write("}\n")
                         elif Mode == 'DSSC Source':
+                            PinNameList = PinName.split(',')
                             NewATPfile.write("\n")
                             NewATPfile.write("instruments = {\n")
                             NewATPfile.write(
-                                "({0}):DigSrc 1;\n".format(PinName))
+                                "({0}):DigSrc {1};\n".format(PinName, len(PinNameList)))
                             NewATPfile.write("}\n")
                         elif Mode == 'CMEM/HRAM Capture':
                             # do nothing here
