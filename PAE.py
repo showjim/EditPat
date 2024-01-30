@@ -9,12 +9,12 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 import traceback
-from main import ReadCSV, EditPattern, InList, main4
+from main import ReadCSV, EditPattern, InList, main4, main11
 import multiprocessing
 from multiprocessing import Pool, Manager
 multiprocessing.freeze_support()
 
-version = 'V1.11.1'
+version = 'V1.11.2'
 
 class DemoClass(tk.Tk):
 
@@ -32,12 +32,21 @@ class DemoClass(tk.Tk):
         self.columnconfigure(0, weight=1, minsize=50)
         self.columnconfigure(1, weight=0)
 
-        topframe = tk.Frame(self, height=80, borderwidth=1)
-        contentframe = tk.Frame(self, height=80, borderwidth=1)
+        # create a notebook
+        notebook = ttk.Notebook(self)
+        notebook.grid(row=0, column=0, sticky="nsew")
+
+        topframe = ttk.Frame(notebook, height=80, borderwidth=1)
+        topframe_simple = ttk.Frame(notebook, height=80, borderwidth=1)
+        contentframe = ttk.Frame(self, height=80, borderwidth=1)
         contentframe.rowconfigure(0, weight=1)
         contentframe.columnconfigure(0, weight=1)
         topframe.grid(row=0, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
+        topframe_simple.grid(row=0, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
         contentframe.grid(row=1, column=0, sticky=tk.W + tk.S + tk.E + tk.N)
+
+        notebook.add(topframe, text='Classical')
+        notebook.add(topframe_simple, text='Simplified')
 
         # Step 1. Please enter ATP file path and name:
         self.ety2 = tk.Entry(topframe, width=40)
@@ -47,7 +56,7 @@ class DemoClass(tk.Tk):
         self.btn2 = tk.Button(
             topframe,
             text='Select ATP Files',
-            command=self.CallATPFile, width=30)
+            command=lambda: self.CallATPFile(self.contents2), width=30)
         # self.btn2.pack()
         self.btn2.grid(row=0, column=1)
 
@@ -64,7 +73,7 @@ class DemoClass(tk.Tk):
         self.btn3 = tk.Button(
             topframe,
             text='Select CSV Files',
-            command=self.CallCSVFile, width=30)
+            command=lambda: self.CallCSVFile(self.contents3), width=30)
         # self.btn2.pack()
         self.btn3.grid(row=1, column=1)
 
@@ -153,6 +162,48 @@ class DemoClass(tk.Tk):
         self.check_box1.grid(row=5, column=1, sticky='W')
         self.check_box2.grid(row=5, column=1, sticky='E')
 
+
+        # Simplified Tab
+        # Step 1. Please enter ATP file path and name:
+        self.ety2_simple = tk.Entry(topframe_simple, width=40)
+        # self.ety2.pack()
+        self.ety2_simple.grid(row=0, column=0)
+
+        self.btn2_simple = tk.Button(
+            topframe_simple,
+            text='Select ATP Files',
+            command=lambda: self.CallATPFile(self.contents2_simple), width=30)
+        # self.btn2.pack()
+        self.btn2_simple.grid(row=0, column=1)
+
+        self.contents2_simple = StringVar()
+        self.contents2_simple.set("Please Select ATP Files")
+        self.ety2_simple.config(textvariable=self.contents2_simple)
+        # ATPFile = self.contents2.get()
+
+        # Step 2. Please enter CSV file path and name:
+        self.ety3_simple = tk.Entry(topframe_simple, width=40)
+        # self.ety3.pack()
+        self.ety3_simple.grid(row=1, column=0)
+
+        self.btn3_simple = tk.Button(
+            topframe_simple,
+            text='Select CSV Files',
+            command=lambda: self.CallCSVFile(self.contents3_simple), width=30)
+        # self.btn2.pack()
+        self.btn3_simple.grid(row=1, column=1)
+        self.contents3_simple = StringVar()
+        self.contents3_simple.set("Please Select CSV File")
+        self.ety3_simple.config(textvariable=self.contents3_simple)
+        # CSVFile = self.contents3.get()
+
+        # Step 6, button
+        self.btn_simple = tk.Button(topframe_simple, text='Generate', command=self.SayHello_simple)  # self.SayHello)
+        # self.btn.pack()
+        self.btn_simple.grid(row=6, column=0, columnspan=2)
+
+
+
         # output log part
         right_bar = tk.Scrollbar(contentframe, orient=tk.VERTICAL)
         bottom_bar = tk.Scrollbar(contentframe, orient=tk.HORIZONTAL)
@@ -184,6 +235,18 @@ class DemoClass(tk.Tk):
         IndexMode = self.check_box_var1.get()
         textout = self.put_data_log
         main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode, textout)
+
+    def SayHello_simple(self):  # (, ATPFile, CSVFile, PinName, Mode):
+        ATPFile = self.ATPfilename
+        CSVFile = self.CSVfilename
+
+        # PinName = self.ety.get()
+        # Mode = self.cmb.get()
+        # TimeMode = self.check_box_var2.get()  # self.cmb2.get()
+        # UserString = self.ety2.get()
+        # IndexMode = self.check_box_var1.get()
+        textout = self.put_data_log
+        main11(ATPFile, CSVFile, textout)
 
     def SayHello_MultProcess(self):
         # disable button
@@ -266,24 +329,24 @@ class DemoClass(tk.Tk):
         else:
             button['state'] = tk.NORMAL
 
-    def CallATPFile(self):
+    def CallATPFile(self, contents2):
         # global ATPfilename
         self.ATPfilename = tk.filedialog.askopenfilenames(
             filetypes=[('ATP File', '*.atp;*.atp.gz'), ("all", "*.*")])  #
-        self.contents2.set(self.ATPfilename)
+        contents2.set(self.ATPfilename)
         # print(filename)
 
-    def CallCSVFile(self):
+    def CallCSVFile(self, contents3):
         # global CSVfilename
         self.CSVfilename = tk.filedialog.askopenfilenames(
             filetypes=[('CSV File', '*.csv'), ("all", "*.*")])
-        self.contents3.set(self.CSVfilename)
+        contents3.set(self.CSVfilename)
         # print(filename)
 
-    def GetFolderPath(self):
+    def GetFolderPath(self, contents2):
         global FolderPath
         FolderPath = tk.filedialog.askdirectory()
-        self.contents2.set(FolderPath)
+        contents2.set(FolderPath)
 
     def addmenu(self, Menu):
         Menu(self)

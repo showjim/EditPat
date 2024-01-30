@@ -3,10 +3,11 @@ Created on Dec 8, 2015
 
 @author: zhouchao
 '''
-import csv, os, re, gzip
+import csv, os, re, gzip, shutil
+from typing import List
 
 
-def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString = ''):
+def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString=''):
     result = False
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
@@ -32,12 +33,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     # remove all "repeat" opcode first
     if IndexMode == 'Cycle':
         RemoveRepeat(something, timemode)
-        RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp') # os.path.realpath('temp_RemoveRepeat.atp')
+        RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('temp_RemoveRepeat.atp')
     else:
         RemoveRepeatFile = something
     with openfile(otherthing, mode='w') as NewATPfile:
         with openfile(RemoveRepeatFile) as ATPfile:
-        # with open(something) as ATPfile:
+            # with open(something) as ATPfile:
             while True:
                 line = ATPfile.readline()
                 LineIndex += 1
@@ -74,9 +75,9 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             pass
                         elif Mode == 'Call Label':
                             NewATPfile.write("\n")
-                            NewATPfile.write("import subr " + UserString + ";\n") #import label
+                            NewATPfile.write("import subr " + UserString + ";\n")  # import label
 
-                            if PinName != '': # if PinName is not empty, then add them as DCVS
+                            if PinName != '':  # if PinName is not empty, then add them as DCVS
                                 PinNameList = PinName.split(',')
                                 NewATPfile.write("instruments = {\n")
                                 for pin in PinNameList:
@@ -133,7 +134,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         if CycleNum == 3:
                             line = 'push_loop c0\t' + line
                         if (CycleNum + 1 >= CycleRange[0][0]) and (
-                            CycleNum + 1 <= CycleRange[-1][1]):
+                                CycleNum + 1 <= CycleRange[-1][1]):
                             if CheckInRange(CycleNum + 1, CycleRange):
                                 line = 'set_cpu_cond (cpuA_cond)\t' + line
 
@@ -146,9 +147,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[
+                                            start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in DigCap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
                                     line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
@@ -164,9 +168,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
-                                            textoutwin("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Drive data found in DigCap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[
+                                            start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in DigCap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in DigCap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
                                     line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
@@ -184,9 +191,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
-                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[
+                                            start_index + 1 + k + 1] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Compare data found in DigSrc, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "D"
                                     line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
@@ -202,9 +212,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[start_index + 1 + k + 1] == 'L':
-                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Compare data found in DigSrc, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == 'H' or line_list[
+                                            start_index + 1 + k + 1] == 'L':
+                                            textoutwin("Warning: Compare data found in DigSrc, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Compare data found in DigSrc, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "D"
                                     line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
@@ -222,9 +235,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
-                                            textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[
+                                            start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in Cap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in Cap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
                                     line = "stv\t" + " ".join(line_list) + "\n"
@@ -240,9 +256,12 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     line_list = line.split()
                                     for k in Index:
                                         start_index = line_list.index(">")
-                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[start_index + 1 + k + 1] == '1':
-                                            textoutwin("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
-                                            print("Warning: Drive data found in Cap, line " + str(LineIndex) + ", and pin data index " + str(k))
+                                        if line_list[start_index + 1 + k + 1] == '0' or line_list[
+                                            start_index + 1 + k + 1] == '1':
+                                            textoutwin("Warning: Drive data found in Cap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
+                                            print("Warning: Drive data found in Cap, line " + str(
+                                                LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
                                     line = " ".join(line_list).replace('repeat', 'stv,repeat') + "\n"
@@ -263,7 +282,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         elif Mode == 'Call Label':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
-                                    line = 'call ' + UserString + '\t' + line # Call Label name
+                                    line = 'call ' + UserString + '\t' + line  # Call Label name
                                 else:
                                     # Call Label does not support on repeat line
                                     pass
@@ -290,13 +309,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
 
 def Check_tset_line(tset_list, line):
     ii = -1
-    for i,val in enumerate(tset_list):
+    for i, val in enumerate(tset_list):
         # last space need here to ensure the end
         val = r"> {0} ".format(val)
         if val in line:
             ii = i
             return ii
     return ii
+
 
 def ReadCSV(something):
     CycleRange = {}
@@ -305,14 +325,22 @@ def ReadCSV(something):
         f_csv = csv.reader(f)
         for row in f_csv:
             if len(row) > 0:
-                tmparray = row[1].replace('[', '').replace(']', '')
-                tmparray = tmparray.split(';')
-                tmparray = [x.split('-') for x in tmparray]
-                tmparray = [sorted([int(y) for y in x]) for x in tmparray]
-                CycleRange[row[0]] = tmparray
+                # tmparray = row[1].replace('[', '').replace(']', '')
+                # tmparray = tmparray.split(';')
+                # tmparray = [x.split('-') for x in tmparray]
+                # tmparray = [sorted([int(y) for y in x]) for x in tmparray]
+                CycleRange[row[0]] = process_input_cycles(row[1])  # tmparray
             else:
                 break
     return CycleRange
+
+
+def process_input_cycles(row: str):
+    tmparray = row.replace('[', '').replace(']', '')
+    tmparray = tmparray.split(';')
+    tmparray = [x.split('-') for x in tmparray]
+    tmparray = [sorted([int(y) for y in x]) for x in tmparray]
+    return tmparray
 
 
 def CheckInRange(CycleNum, CycleRange):
@@ -337,15 +365,16 @@ def FindPinIndex(PinNames, STRLine):
     STRLine = STRLine.replace(' ', '')
     pattern = re.compile(r'(?<=\,)\s*([^\,^\s]+)(?=[\,\)])')
     tmparray = re.findall(pattern, STRLine)
-    Index = [] #-1
+    Index = []  # -1
     for i in range(len(PinName)):
         for x in range(len(tmparray)):
             if tmparray[x] == PinName[i]:
                 Index.append(x)
-    if len(Index)!=len(PinName):
+    if len(Index) != len(PinName):
         Index = []
         print("Error: Cannot find all given pins")
     return Index
+
 
 def RemoveOpcode(something, UserString):
     otherthing = something.replace(r'.atp', r'_RemoveOpcode.atp')
@@ -359,11 +388,13 @@ def RemoveOpcode(something, UserString):
                     tmpLine = tmpLine.replace(UserString, '')
                 NewATPfile.write(tmpLine)
 
+
 def openfile(filename, mode='r'):
     if filename.endswith('.gz'):
-        return gzip.open(filename, mode + 't') # "t" means open gz as string
+        return gzip.open(filename, mode + 't')  # "t" means open gz as string
     else:
         return open(filename, mode)
+
 
 def RemoveRepeat(something, timemode):
     otherthing = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('new_RemoveRepeat.atp')
@@ -387,7 +418,7 @@ def RemoveRepeat(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.strip().startswith(r"{"): #(r"start_label"):  # check the header part
+                    if headerline.strip().startswith(r"{"):  # (r"start_label"):  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
@@ -416,7 +447,7 @@ def RemoveRepeat(something, timemode):
                         # i = 0
                         # j = len('repeat ' + str(RepeatCnt))
                         # line = line.replace('repeat ' + str(RepeatCnt), ' ' * j)
-                        line[-1] = line[-1].replace('repeat',  ' ' * len('repeat'), 1)
+                        line[-1] = line[-1].replace('repeat', ' ' * len('repeat'), 1)
                         line[-1] = line[-1].replace(str(RepeatCnt), ' ' * len(str(RepeatCnt)), 1)
                         for j in range(RepeatCnt):
                             for i in range(len(line)):
@@ -454,7 +485,8 @@ def AddReapt(something, timemode):
                 line = []  # initial line for dual mode
                 if not Boby_Flag:
                     headerline = ATPfile.readline()
-                    if headerline.strip().startswith(r"{"): #headerline.find(r"start_label") != -1:  # check the header part
+                    if headerline.strip().startswith(
+                            r"{"):  # headerline.find(r"start_label") != -1:  # check the header part
                         Boby_Flag = True
 
                     if len(headerline) == 0:
@@ -526,61 +558,13 @@ def cmp(a, b):  # compare two lists
             tempb = str(b[i])
             commtindexb = tempa.find('//')
             if commtindexa > 0:
-                tempa = tempa[:commtindexa].strip( )
+                tempa = tempa[:commtindexa].strip()
             if commtindexb > 0:
-                tempb = tempb[:commtindexb].strip( )
+                tempb = tempb[:commtindexb].strip()
             result = (tempa > tempb) - (tempa < tempb)
             if result != 0:
                 break
     return result
-
-
-def main11():
-    something = input('Step 1. Please enter ATP file path and name:\n')
-    CSVFile = input("Step 2. Please enter CSV file path and name:\n")
-    PinName = input('Step 3. Please enter the name of the pin need to edit:\n')
-    print('Step 4. Please choose function, input the NO.')
-    choosefunction = input(
-        '1.DSSC Capture;\n2.DSSC Source;\n3.CMEM/HRAM Capture.\n')
-    timemode = input('1. Single\n2. Dual')
-
-    input('Press Enter key to exit!')
-
-
-def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, textoutwin):
-    # ATPFiles = []
-    # CSVFiles = []
-    # GetFiles(ATPFiles, Dir, ".atp")
-    # GetFiles(CSVFiles, Dir, ".csv")
-    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-               'Call Label', 'Remove Opcode']
-    if TimeMode == 'Single':
-        timemode = '1'
-    elif TimeMode == 'Dual':
-        timemode = '2'
-    CycleRanges = []
-    if len(CSVFiles) > 1:
-        textoutwin("Error: Only ONE CSV file supported !!!")
-        print("Error: Only ONE CSV file supported !!!")
-        return
-    CycleRanges = ReadCSV(CSVFiles[0])
-
-    for key in CycleRanges.keys():
-        tmpFileName = key  # CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
-        j = InList(tmpFileName, ATPFiles)
-        if j >= 0:
-            textoutwin("Info: Start convert file: " + ATPFiles[j])
-            print("Info: start convert file: +" + ATPFiles[j])
-            if Mode in CmbList:
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode, UserString)
-            else:
-                textoutwin("Error: Wrong Choice !!!")
-                print("Error: Wrong Choice !!!")
-            textoutwin("Info: Done conversion")
-            print("Info: Done conversion")
-        else:
-            textoutwin("Warning: Cannot find atp file: " + tmpFileName)
-            print("Warning: Cannot find atp file: " + tmpFileName)
 
 
 def GetFiles(files_array, dirname, extname):
@@ -603,8 +587,114 @@ def InList(str, tmplist):
     return -1
 
 
+def main11(ATPFiles, merge_config_file, textoutwin):
+    # use to process merge-setup format input
+    config_list = []
+    with openfile(merge_config_file[0]) as f:
+        f_csv = csv.reader(f)
+        for index, row in enumerate(f_csv):
+            if index == 0:
+                head_list = row
+            elif len(row) > 0:
+                cur_config_dict = {"ATPFile": "", "CycleRange": None, "Mode": "", "PinName": "", "TimeMode": "Single",
+                                   "IndexMode": "Cycle"}
+                for i, item in enumerate(row):
+                    if i == 1 and item.lower().endswith(".atp"):
+                        cur_config_dict["ATPFile"] = item
+                    elif i == 3 or (i == 6 and item != ""):
+                        cur_config_dict["Mode"] = item
+                    elif i == 4 or (i == 7 and item != ""):
+                        cur_config_dict["PinName"] = item
+                    elif i == 5 or (i == 8 and item != ""):
+                        cur_config_dict["CycleRange"] = process_input_cycles(item)
+                        tmp_dict = cur_config_dict.copy()
+                        config_list.append(tmp_dict)
+
+            else:
+                textoutwin("Warning: NO CONFIG FOUND!!!")
+                break
+
+    # process atp files
+    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+               'Call Label', 'Remove Opcode']
+
+    preFileName = ""
+    for config_item in config_list:
+        # initial parameters
+        tmpFileName = config_item["ATPFile"]
+        Mode = config_item["Mode"]
+        PinName = config_item["PinName"]
+        CycleRange = config_item["CycleRange"]
+        TimeMode = config_item["TimeMode"]
+        if TimeMode == 'Single':
+            time_mode = '1'
+        elif TimeMode == 'Dual':
+            time_mode = '2'
+        IndexMode = config_item["IndexMode"]
+        UserString = ""
+        j = InList(tmpFileName, ATPFiles)
+
+        # if some  name as previous, then copy output of previous to src path
+        if preFileName == tmpFileName:
+            OutputPath = os.getcwd() + '/Output'
+            otherthing = os.path.join(OutputPath, os.path.basename(ATPFiles[j]))
+            shutil.copy(otherthing, ATPFiles[j])
+
+        # go~ and run process function
+        if j >= 0:
+            textoutwin("Info: Start convert file: " + ATPFiles[j])
+            print("Info: start convert file: +" + ATPFiles[j])
+            if Mode in CmbList:
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode, UserString)
+                preFileName = tmpFileName
+            else:
+                textoutwin("Error: Wrong Choice !!!")
+                print("Error: Wrong Choice !!!")
+            textoutwin("Info: Done conversion")
+            print("Info: Done conversion")
+        else:
+            textoutwin("Warning: Cannot find atp file: " + tmpFileName)
+            print("Warning: Cannot find atp file: " + tmpFileName)
+
+
+def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, textoutwin):
+    # ATPFiles = []
+    # CSVFiles = []
+    # GetFiles(ATPFiles, Dir, ".atp")
+    # GetFiles(CSVFiles, Dir, ".csv")
+    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+               'Call Label', 'Remove Opcode']
+    if TimeMode == 'Single':
+        time_mode = '1'
+    elif TimeMode == 'Dual':
+        time_mode = '2'
+    CycleRanges = []
+    if len(CSVFiles) > 1:
+        textoutwin("Error: Only ONE CSV file supported !!!")
+        print("Error: Only ONE CSV file supported !!!")
+        return
+    CycleRanges = ReadCSV(CSVFiles[0])
+
+    for key in CycleRanges.keys():
+        tmpFileName = key  # CycleRanges[i]#CSVFiles[i].replace('.csv', '.atp')
+        j = InList(tmpFileName, ATPFiles)
+        if j >= 0:
+            textoutwin("Info: Start convert file: " + ATPFiles[j])
+            print("Info: start convert file: +" + ATPFiles[j])
+            if Mode in CmbList:
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, time_mode, IndexMode, UserString)
+            else:
+                textoutwin("Error: Wrong Choice !!!")
+                print("Error: Wrong Choice !!!")
+            textoutwin("Info: Done conversion")
+            print("Info: Done conversion")
+        else:
+            textoutwin("Warning: Cannot find atp file: " + tmpFileName)
+            print("Warning: Cannot find atp file: " + tmpFileName)
+
+
 if __name__ == '__main__':
-    main11()
+    main11(r"C:\Users\zhouchao\PycharmProjects\EditPat\S5\Post_process_pattern_list_S5.csv")
     '''
     csv_array = []
     GetFiles(csv_array, r"/Users/Jerry/OneDrive/Python/EditPat", ".csv")  # main2()
