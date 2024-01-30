@@ -166,7 +166,6 @@ class DemoClass(tk.Tk):
         # Simplified Tab
         # Step 1. Please enter ATP file path and name:
         self.ety2_simple = tk.Entry(topframe_simple, width=40)
-        # self.ety2.pack()
         self.ety2_simple.grid(row=0, column=0)
 
         self.btn2_simple = tk.Button(
