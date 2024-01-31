@@ -246,7 +246,7 @@ class DemoClass(tk.Tk):
         # UserString = self.ety2.get()
         # IndexMode = self.check_box_var1.get()
         textout = self.put_data_log
-        main11(ATPFile, CSVFile, textout)
+        main11(ATPFile, CSVFile[0], textout)
 
     def SayHello_MultProcess(self):
         # disable button

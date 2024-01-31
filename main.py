@@ -3,8 +3,9 @@ Created on Dec 8, 2015
 
 @author: zhouchao
 '''
-import csv, os, re, gzip, shutil
-from typing import List
+import csv, os, re, gzip, shutil, glob
+import zipfile
+from pathlib import Path
 
 
 def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString=''):
@@ -304,7 +305,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
             print("The file " + RemoveRepeatFile + " does not exist")
     textoutwin("Info: Done conversion: " + something)
     print("Info: Done conversion: " + something)
-    return result
+    return otherthing
 
 
 def Check_tset_line(tset_list, line):
@@ -587,10 +588,31 @@ def InList(str, tmplist):
     return -1
 
 
+def get_all_files_list(source_dir, exts):
+    all_files = []
+    result = []
+    for ext in exts:
+        all_files.extend(
+            glob.glob(os.path.join(source_dir, f"*.{ext}"), recursive=False)
+        )
+    for filepath in all_files:
+        file_name = Path(filepath).name
+        result.append(file_name)
+    return result
+
+
+def make_zip(filenames, output_filename):
+    with zipfile.ZipFile(output_filename, 'w') as zipf:
+        for filename in filenames:
+            print(filename)
+            zipf.write(filename)
+        print()
+
+
 def main11(ATPFiles, merge_config_file, textoutwin):
     # use to process merge-setup format input
     config_list = []
-    with openfile(merge_config_file[0]) as f:
+    with openfile(merge_config_file) as f:
         f_csv = csv.reader(f)
         for index, row in enumerate(f_csv):
             if index == 0:
@@ -599,16 +621,18 @@ def main11(ATPFiles, merge_config_file, textoutwin):
                 cur_config_dict = {"ATPFile": "", "CycleRange": None, "Mode": "", "PinName": "", "TimeMode": "Single",
                                    "IndexMode": "Cycle"}
                 for i, item in enumerate(row):
-                    if i == 1 and item.lower().endswith(".atp"):
-                        cur_config_dict["ATPFile"] = item
-                    elif i == 3 or (i == 6 and item != ""):
-                        cur_config_dict["Mode"] = item
-                    elif i == 4 or (i == 7 and item != ""):
-                        cur_config_dict["PinName"] = item
-                    elif i == 5 or (i == 8 and item != ""):
-                        cur_config_dict["CycleRange"] = process_input_cycles(item)
-                        tmp_dict = cur_config_dict.copy()
-                        config_list.append(tmp_dict)
+                    item = item.strip()
+                    if item != "" and item is not None:
+                        if i == 1 and item.lower().endswith(".atp"):
+                            cur_config_dict["ATPFile"] = item
+                        elif i == 3 or i == 6:
+                            cur_config_dict["Mode"] = item
+                        elif i == 4 or i == 7:
+                            cur_config_dict["PinName"] = item
+                        elif i == 5 or i == 8:
+                            cur_config_dict["CycleRange"] = process_input_cycles(item)
+                            tmp_dict = cur_config_dict.copy()
+                            config_list.append(tmp_dict)
 
             else:
                 textoutwin("Warning: NO CONFIG FOUND!!!")
@@ -619,6 +643,7 @@ def main11(ATPFiles, merge_config_file, textoutwin):
                'Call Label', 'Remove Opcode']
 
     preFileName = ""
+    result = []
     for config_item in config_list:
         # initial parameters
         tmpFileName = config_item["ATPFile"]
@@ -645,8 +670,10 @@ def main11(ATPFiles, merge_config_file, textoutwin):
             textoutwin("Info: Start convert file: " + ATPFiles[j])
             print("Info: start convert file: +" + ATPFiles[j])
             if Mode in CmbList:
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode, UserString)
+                result_file = EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode,
+                                          UserString)
                 preFileName = tmpFileName
+                result.append(result_file)
             else:
                 textoutwin("Error: Wrong Choice !!!")
                 print("Error: Wrong Choice !!!")
@@ -655,6 +682,7 @@ def main11(ATPFiles, merge_config_file, textoutwin):
         else:
             textoutwin("Warning: Cannot find atp file: " + tmpFileName)
             print("Warning: Cannot find atp file: " + tmpFileName)
+    return result
 
 
 def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, textoutwin):
