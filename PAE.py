@@ -14,7 +14,7 @@ import multiprocessing
 from multiprocessing import Pool, Manager
 multiprocessing.freeze_support()
 
-version = 'V1.11.2'
+version = 'V1.11.3'
 
 class DemoClass(tk.Tk):
 
@@ -93,7 +93,7 @@ class DemoClass(tk.Tk):
 
         # Step 4. Please choose function
         CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-                   'Call Label', 'Remove Opcode']
+                   'Add opcode', 'Remove Opcode']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=37)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
@@ -271,7 +271,7 @@ class DemoClass(tk.Tk):
         # main4 part
         try:
             CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-                       'Call Label', 'Remove Opcode']
+                       'Add opcode', 'Remove Opcode']
             if TimeMode == 'Single':
                 timemode = '1'
             elif TimeMode == 'Dual':

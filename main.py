@@ -74,9 +74,9 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         elif Mode == 'WFLAG':
                             # do nothing here
                             pass
-                        elif Mode == 'Call Label':
+                        elif Mode == 'Add opcode':
                             NewATPfile.write("\n")
-                            NewATPfile.write("import subr " + UserString + ";\n")  # import label
+                            # NewATPfile.write("import subr " + UserString + ";\n")  # import label
 
                             if PinName != '':  # if PinName is not empty, then add them as DCVS
                                 PinNameList = PinName.split(',')
@@ -280,12 +280,13 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                 else:
                                     # WFLAG does not support on repeat line
                                     pass
-                        elif Mode == 'Call Label':
+                        elif Mode == 'Add opcode':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
-                                    line = 'call ' + UserString + '\t' + line  # Call Label name
+                                    # line = 'call ' + UserString + '\t' + line  # Add opcode name
+                                    line = UserString + '\t' + line
                                 else:
-                                    # Call Label does not support on repeat line
+                                    # Add opcode does not support on repeat line
                                     pass
 
                     NewATPfile.write(line)
@@ -640,7 +641,7 @@ def main11(ATPFiles, merge_config_file, textoutwin):
 
     # process atp files
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-               'Call Label', 'Remove Opcode']
+               'Add opcode', 'Remove Opcode']
 
     preFileName = ""
     result = []
@@ -691,7 +692,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
     # GetFiles(ATPFiles, Dir, ".atp")
     # GetFiles(CSVFiles, Dir, ".csv")
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-               'Call Label', 'Remove Opcode']
+               'Add opcode', 'Remove Opcode']
     if TimeMode == 'Single':
         time_mode = '1'
     elif TimeMode == 'Dual':
