@@ -20,3 +20,7 @@ EXPOSE 8501
 
 # 运行 Streamlit 应用
 CMD ["streamlit", "run", "webapp.py"]
+
+# 健康检查
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost:8501/ || exit 1

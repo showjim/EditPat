@@ -88,9 +88,9 @@ def main():
 
     # Step 3. Run post-process
     st.subheader('Step 3. Run post-process')
-    merge_config_file = os.path.join(OutputPath, "sample.csv")
-    merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
     if st.button("Run Post-Process"):
+        merge_config_file = os.path.join(OutputPath, "sample.csv")
+        merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
         result_fils = main11(st.session_state["FileList"], merge_config_file, print_info)
         st.session_state["ResultFiles"] = result_fils
 
