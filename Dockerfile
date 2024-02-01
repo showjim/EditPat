@@ -4,10 +4,21 @@
 
 # 由于您正在使用 M1 Mac，我们将使用 buildx 来构建镜像
 # 因此，您不需要在 Dockerfile 中指定平台
-FROM python:3.8
+FROM python:3.9-slim
 
 # 设置工作目录
 WORKDIR /app
+
+# Debian 12 换成国内源
+RUN sed -i 's@deb.debian.org@mirror.sjtu.edu.cn@g' /etc/apt/sources.list.d/debian.sources
+
+# 安装curl tk等必要的软件
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    software-properties-common \
+    tk \
+    && rm -rf /var/lib/apt/lists/*
 
 # 复制应用文件到容器中
 COPY . /app
