@@ -24,6 +24,10 @@ def main():
         st.session_state["InitCSVFileFlag"] = False
     if "ResultFiles" not in st.session_state:
         st.session_state["ResultFiles"] = []
+    if "ZipFilesFlag" not in st.session_state:
+        st.session_state["ZipFilesFlag"] = True
+    if "ZipFilesName" not in st.session_state:
+        st.session_state["ZipFilesName"] = ""
     work_path = os.path.abspath('.')
     OutputPath = os.path.join(work_path, "tempDir")
     if not os.path.exists(OutputPath):  # check the directory is existed or not
@@ -93,14 +97,21 @@ def main():
         merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
         result_fils = main11(st.session_state["FileList"], merge_config_file, print_info)
         st.session_state["ResultFiles"] = result_fils
+        st.session_state["ZipFilesFlag"] = True
 
     if len(st.session_state["ResultFiles"]) > 0:
         st.subheader('Step 4. Download Zipped Result')
-        cur_time = datetime.now()
-        zip_file_name = "ZipFile_" + cur_time.strftime("%Y%m%d%H%M%S") + ".zip"
-        cur_path = os.path.dirname(st.session_state["ResultFiles"][0])
-        compress_file = os.path.join(cur_path, zip_file_name)
-        make_zip(st.session_state["ResultFiles"], compress_file)
+        if st.session_state["ZipFilesFlag"] == True:
+            st.session_state["ZipFilesFlag"] = False
+            cur_time = datetime.now()
+            zip_file_name = "ZipFile_" + cur_time.strftime("%Y%m%d%H%M%S") + ".zip"
+            cur_path = os.path.dirname(st.session_state["ResultFiles"][0])
+            compress_file = os.path.join(cur_path, zip_file_name)
+            make_zip(st.session_state["ResultFiles"], compress_file)
+            st.session_state["ZipFilesName"] = compress_file
+
+        compress_file = st.session_state["ZipFilesName"]
+        zip_file_name = os.path.basename(compress_file)
         with open(compress_file, "rb") as file:
             btn = st.download_button(
                 label="Download Result Zip File",
