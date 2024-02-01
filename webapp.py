@@ -71,7 +71,7 @@ def main():
         )
         st.session_state["CSVFileTab"] = df
         st.session_state["InitCSVFileFlag"] = True
-    edited_placeholder.data_editor(st.session_state["CSVFileTab"], num_rows="dynamic")
+    edited_df = edited_placeholder.data_editor(st.session_state["CSVFileTab"], num_rows="dynamic")
 
     ## 2.2
     file_path = st.file_uploader("`2.2. Or Upload a CSV config file`",
@@ -79,7 +79,8 @@ def main():
     if st.button("Upload CSV"):
         csv_config = pd.read_csv(file_path)
         edited_df = edited_placeholder.data_editor(csv_config, num_rows="dynamic")
-        st.session_state["CSVFileTab"] = edited_df
+
+    st.session_state["CSVFileTab"] = edited_df
 
     # Step 3. Run post-process
     st.subheader('Step 3. Run post-process')
