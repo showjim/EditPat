@@ -6,6 +6,7 @@ Created on Dec 8, 2015
 import csv, os, re, gzip, shutil, glob
 import zipfile
 from pathlib import Path
+from typing import List
 
 
 def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString=''):
@@ -602,7 +603,7 @@ def get_all_files_list(source_dir, exts):
     return result
 
 
-def make_zip(filenames, output_filename):
+def make_zip(filenames: List, output_filename):
     with zipfile.ZipFile(output_filename, 'w') as zipf:
         for filename in filenames:
             print(filename)
@@ -674,7 +675,8 @@ def main11(ATPFiles, merge_config_file, textoutwin):
                 result_file = EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode,
                                           UserString)
                 preFileName = tmpFileName
-                result.append(result_file)
+                if result_file not in result:
+                    result.append(result_file)
             else:
                 textoutwin("Error: Wrong Choice !!!")
                 print("Error: Wrong Choice !!!")
