@@ -9,12 +9,14 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 import traceback
-from main import ReadCSV, EditPattern, InList, main4, main11
-import multiprocessing
+from main import ReadCSV, EditPattern, InList, main4, main11, analyse_merge_config
+import multiprocessing, shutil, os
 from multiprocessing import Pool, Manager
+
 multiprocessing.freeze_support()
 
 version = 'V1.12.1'
+
 
 class DemoClass(tk.Tk):
 
@@ -162,7 +164,6 @@ class DemoClass(tk.Tk):
         self.check_box1.grid(row=5, column=1, sticky='W')
         self.check_box2.grid(row=5, column=1, sticky='E')
 
-
         # Simplified Tab
         # Step 1. Please enter ATP file path and name:
         self.ety2_simple = tk.Entry(topframe_simple, width=40)
@@ -197,11 +198,9 @@ class DemoClass(tk.Tk):
         # CSVFile = self.contents3.get()
 
         # Step 6, button
-        self.btn_simple = tk.Button(topframe_simple, text='Generate', command=self.SayHello_simple)  # self.SayHello)
+        self.btn_simple = tk.Button(topframe_simple, text='Generate', command=self.SayHello_simple)  # self.SayHello_simple)
         # self.btn.pack()
         self.btn_simple.grid(row=6, column=0, columnspan=2)
-
-
 
         # output log part
         right_bar = tk.Scrollbar(contentframe, orient=tk.VERTICAL)
@@ -247,6 +246,90 @@ class DemoClass(tk.Tk):
         textout = self.put_data_log
         main11(ATPFile, CSVFile[0], textout)
 
+    def single_item_post_process_simple(self, preFileName, tmpFileName, ATPFiles, textoutwin, Mode, CmbList, PinName,
+                                        CycleRange, time_mode, IndexMode, UserString, result, j):
+        # if some  name as previous, then copy output of previous to src path
+        if preFileName == tmpFileName:
+            OutputPath = os.path.join(os.getcwd(), 'Output')
+            otherthing = os.path.join(OutputPath, os.path.basename(ATPFiles[j]))
+            shutil.copy(otherthing, ATPFiles[j])
+
+        # go~ and run process function
+        if j >= 0:
+            textoutwin("Info: Start convert file: " + ATPFiles[j])
+            print("Info: start convert file: +" + ATPFiles[j])
+            if Mode in CmbList:
+                result_file = EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode,
+                                          IndexMode,
+                                          UserString)
+                preFileName = tmpFileName
+                if result_file not in result:
+                    result.append(result_file)
+            else:
+                textoutwin("Error: Wrong Choice !!!")
+                print("Error: Wrong Choice !!!")
+            textoutwin("Info: Done conversion")
+            print("Info: Done conversion")
+        else:
+            textoutwin("Warning: Cannot find atp file: " + tmpFileName)
+            print("Warning: Cannot find atp file: " + tmpFileName)
+
+        return preFileName
+
+    def SayHello_simple_MultProcess(self):
+        # disable button
+        self.switchButtonState(self.btn_simple)
+        ATPFiles = self.ATPfilename
+        CSVFile = self.CSVfilename
+        merge_config_file = CSVFile[0]
+
+        textoutwin = self.put_data_log
+        self.queue = Manager().Queue()
+        self.counter = Manager().Value('i', 0)
+        self.pool = Pool(processes=4)  # max 4 processes
+
+        try:
+            # use to process merge-setup format input
+            config_list = analyse_merge_config(merge_config_file, textoutwin)
+
+            # process atp files
+            CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
+                       'WFLAG',
+                       'Add opcode', 'Remove Opcode']
+
+            preFileName = ""
+            result = []
+            self.total_tasks = 0
+            for config_item in config_list:
+                # initial parameters
+                tmpFileName = config_item["ATPFile"]
+                Mode = config_item["Mode"]
+                PinName = config_item["PinName"]
+                CycleRange = config_item["CycleRange"]
+                TimeMode = config_item["TimeMode"]
+                if TimeMode == 'Single':
+                    time_mode = '1'
+                elif TimeMode == 'Dual':
+                    time_mode = '2'
+                IndexMode = config_item["IndexMode"]
+                UserString = ""
+                j = InList(tmpFileName, ATPFiles)
+                self.total_tasks += 1
+                self.pool.apply_async(self.single_item_post_process_simple,
+                                      args=(preFileName, tmpFileName, ATPFiles, textoutwin, Mode, CmbList, PinName,
+                                            CycleRange, time_mode, IndexMode, UserString, result, j),
+                                      callback=self.my_callback)
+                # preFileName = self.single_item_post_process_simple(preFileName, tmpFileName, ATPFiles, textoutwin, Mode,
+                #                                                    CmbList,
+                #                                                    PinName, CycleRange, time_mode, IndexMode,
+                #                                                    UserString, result, j)
+            self.after(500, self.update_progress)
+        except Exception:
+            error_msg = traceback.format_exc()
+            self.put_data_log(error_msg)
+            # enable button
+            self.switchButtonState(self.btn)
+
     def SayHello_MultProcess(self):
         # disable button
         self.switchButtonState(self.btn)
@@ -269,7 +352,8 @@ class DemoClass(tk.Tk):
 
         # main4 part
         try:
-            CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
+            CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
+                       'WFLAG',
                        'Add opcode', 'Remove Opcode']
             if TimeMode == 'Single':
                 timemode = '1'

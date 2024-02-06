@@ -610,9 +610,7 @@ def make_zip(filenames: List, output_filename):
             zipf.write(filename)
         print()
 
-
-def main11(ATPFiles, merge_config_file, textoutwin):
-    # use to process merge-setup format input
+def analyse_merge_config(merge_config_file:str, textoutwin):
     config_list = []
     with openfile(merge_config_file) as f:
         f_csv = csv.reader(f)
@@ -639,6 +637,11 @@ def main11(ATPFiles, merge_config_file, textoutwin):
             else:
                 textoutwin("Warning: NO CONFIG FOUND!!!")
                 break
+    return config_list
+
+def main11(ATPFiles, merge_config_file, textoutwin):
+    # use to process merge-setup format input
+    config_list = analyse_merge_config(merge_config_file, textoutwin)
 
     # process atp files
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
@@ -663,7 +666,7 @@ def main11(ATPFiles, merge_config_file, textoutwin):
 
         # if some  name as previous, then copy output of previous to src path
         if preFileName == tmpFileName:
-            OutputPath = os.getcwd() + '/Output'
+            OutputPath = os.path.join(os.getcwd(), 'Output')
             otherthing = os.path.join(OutputPath, os.path.basename(ATPFiles[j]))
             shutil.copy(otherthing, ATPFiles[j])
 
