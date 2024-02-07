@@ -50,7 +50,7 @@ def main():
                     uploaded_path = uploaded_paths[-1]
                     with open(uploaded_path, mode="wb") as f:
                         f.write(file_path.getbuffer())
-                    my_bar.progress(int(100 * i / len(file_paths)), text="Saving file...")
+                    my_bar.progress(int(100 * (i + 1) / len(file_paths)), text="Saving file...")
 
             with st.spinner('Checking file'):
                 for uploaded_path in uploaded_paths:
