@@ -75,7 +75,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         elif Mode == 'WFLAG':
                             # do nothing here
                             pass
-                        elif Mode == 'Add opcode':
+                        elif Mode == 'Add Opcode':
                             NewATPfile.write("\n")
                             # NewATPfile.write("import subr " + UserString + ";\n")  # import label
 
@@ -281,7 +281,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                 else:
                                     # WFLAG does not support on repeat line
                                     pass
-                        elif Mode == 'Add opcode':
+                        elif Mode == 'Add Opcode':
                             if RepeatCnt == 1:
                                 if CheckInRange(CycleNum, CycleRange):
                                     # line = 'call ' + UserString + '\t' + line  # Add opcode name
@@ -645,7 +645,7 @@ def main11(ATPFiles, merge_config_file, textoutwin):
 
     # process atp files
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-               'Add opcode', 'Remove Opcode']
+               'Add Opcode', 'Remove Opcode']
 
     preFileName = ""
     result = []
@@ -697,7 +697,7 @@ def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, te
     # GetFiles(ATPFiles, Dir, ".atp")
     # GetFiles(CSVFiles, Dir, ".csv")
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-               'Add opcode', 'Remove Opcode']
+               'Add Opcode', 'Remove Opcode']
     if TimeMode == 'Single':
         time_mode = '1'
     elif TimeMode == 'Dual':

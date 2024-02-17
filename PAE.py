@@ -15,7 +15,7 @@ from multiprocessing import Pool, Manager
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.1'
+version = 'V1.12.2'
 
 
 class DemoClass(tk.Tk):
@@ -95,7 +95,7 @@ class DemoClass(tk.Tk):
 
         # Step 4. Please choose function
         CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-                   'Add opcode', 'Remove Opcode']
+                   'Add Opcode', 'Remove Opcode']
         self.cmb = ttk.Combobox(topframe, values=CmbList, width=37)
         # self.cmb.pack()
         self.cmb.grid(row=3, column=0)
@@ -295,7 +295,7 @@ class DemoClass(tk.Tk):
             # process atp files
             CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
                        'WFLAG',
-                       'Add opcode', 'Remove Opcode']
+                       'Add Opcode', 'Remove Opcode']
 
             preFileName = ""
             result = []
@@ -354,7 +354,7 @@ class DemoClass(tk.Tk):
         try:
             CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
                        'WFLAG',
-                       'Add opcode', 'Remove Opcode']
+                       'Add Opcode', 'Remove Opcode']
             if TimeMode == 'Single':
                 timemode = '1'
             elif TimeMode == 'Dual':

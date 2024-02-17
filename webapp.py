@@ -79,7 +79,27 @@ def main():
         )
         st.session_state["CSVFileTab"] = df
         st.session_state["InitCSVFileFlag"] = True
-    edited_df = edited_placeholder.data_editor(st.session_state["CSVFileTab"], num_rows="dynamic")
+    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG']
+    edited_df = edited_placeholder.data_editor(
+        st.session_state["CSVFileTab"],
+        num_rows="dynamic",
+        column_config={
+            "Process Type": st.column_config.SelectboxColumn(
+                "Process Type",
+                help="How would you like to process ATP file",
+                width="medium",
+                options=CmbList,
+                required=True,
+            ),
+            "Process Type 2": st.column_config.SelectboxColumn(
+                "Process Type 2",
+                help="How would you like to process ATP file",
+                width="medium",
+                options=CmbList,
+                required=False,
+            ),
+        },
+    )
 
     ## 2.2
     file_path = st.file_uploader("`2.2. Or Upload a CSV config file`",
