@@ -28,10 +28,20 @@ def main():
         st.session_state["ZipFilesFlag"] = True
     if "ZipFilesName" not in st.session_state:
         st.session_state["ZipFilesName"] = ""
+    if "PAE_logprint" not in st.session_state:
+        st.session_state["PAE_logprint"] = ""
     work_path = os.path.abspath('.')
     OutputPath = os.path.join(work_path, "tempDir")
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
+
+    with st.expander("Run Logs"):
+        log_text_area = st.empty()  # text_area("", key="logs", height=300)
+
+    def send_log(data_log):
+        st.session_state["PAE_logprint"] += f'{datetime.now()} - {data_log}\n'
+        log_text_area.code(st.session_state["PAE_logprint"])
+
 
     # Step 1. Upload atp/atp.gz files
     st.subheader('Step 1. Upload atp/atp.gz files')
@@ -115,7 +125,7 @@ def main():
     if st.button("Run Post-Process"):
         merge_config_file = os.path.join(OutputPath, "sample.csv")
         merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
-        result_fils = main11(st.session_state["FileList"], merge_config_file, print_info)
+        result_fils = main11(st.session_state["FileList"], merge_config_file, send_log) #print_info)
         st.session_state["ResultFiles"] = result_fils
         st.session_state["ZipFilesFlag"] = True
 
