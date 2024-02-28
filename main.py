@@ -298,6 +298,9 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                         CycleNum += 1
 
                 if len(line) == 0:
+                    if CycleNum < CycleRange[-1][1]:
+                        textoutwin('Error: The cycle you specified exceeds the total number of cycles in the pattern: ' + something)
+                        print('Error: The cycle you specified exceeds the total number of cycles in the pattern: ' + something)
                     break
         if os.path.exists(RemoveRepeatFile):
             if IndexMode == 'Cycle':
