@@ -89,7 +89,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
 
                     # check the index of pin in pin head
                     elif line.find("$tset") != -1:
-                        Index = FindPinIndex(PinName, line)
+                        Index = FindPinIndex(PinName, line, textoutwin)
                         if 0 in Index:
                             textoutwin('Error: Cannot find pinname')
                             print('Error: Cannot find pinname')
@@ -364,7 +364,7 @@ def CheckInSameRange(CycleNumList, CycleRange):
     return False
 
 
-def FindPinIndex(PinNames, STRLine):
+def FindPinIndex(PinNames, STRLine, textoutwin):
     # pattern = re.compile(r"\,\s*(.+)\)")
     # (?<=\b\,)\s*([^\,^\s]+)(?=[\,\)\s*])
     PinName = PinNames.split(",")
@@ -378,6 +378,7 @@ def FindPinIndex(PinNames, STRLine):
                 Index.append(x)
     if len(Index) != len(PinName):
         Index = []
+        textoutwin("Error: Cannot find all given pins")
         print("Error: Cannot find all given pins")
     return Index
 
