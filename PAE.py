@@ -9,13 +9,13 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 import traceback
-from main import ReadCSV, EditPattern, InList, main4, main11, analyse_merge_config
+from main import ReadCSV, EditPattern, InList, main4, main11, analyse_merge_config, ReadPinMap
 import multiprocessing, shutil, os
 from multiprocessing import Pool, Manager
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.4'
+version = 'V1.12.5'
 
 
 class DemoClass(tk.Tk):
@@ -104,6 +104,20 @@ class DemoClass(tk.Tk):
         self.contents5.set("[Please Select Capture Mode]")
         self.cmb.config(textvariable=self.contents5)
 
+        # Step 5. Please enter pinmap file path and name:
+        self.ety4 = tk.Entry(topframe, width=40)
+        self.ety4.grid(row=4, column=0)
+
+        self.btn4 = tk.Button(
+            topframe,
+            text='Optional: Select Pinmap File',
+            command=lambda: self.CallPinmapFile(self.contents4), width=30)
+        self.btn4.grid(row=4, column=1)
+
+        self.contents4 = StringVar()
+        self.contents4.set("Optional: Please Select Pinmap File")
+        self.ety4.config(textvariable=self.contents4)
+
         # Step 5. Please choose time mode
         # CmbList = ['Single', 'Dual']
         # self.cmb2 = ttk.Combobox(topframe, values=CmbList, width=27)
@@ -127,14 +141,14 @@ class DemoClass(tk.Tk):
                                           value='Dual',
                                           command=self.on_radiobox_changed)
         self.check_box_var2.set('Single')
-        self.check_box_Label2.grid(row=4, column=0, sticky='E')
-        self.check_box3.grid(row=4, column=1, sticky='W')
-        self.check_box4.grid(row=4, column=1, sticky='E')
+        self.check_box_Label2.grid(row=5, column=0, sticky='E')
+        self.check_box3.grid(row=5, column=1, sticky='W')
+        self.check_box4.grid(row=5, column=1, sticky='E')
 
         # Step 6, button
-        self.btn = tk.Button(topframe, text='Generate', command=self.SayHello_MultProcess)  # self.SayHello)
+        self.btn = tk.Button(topframe, text='Generate', command=self.SayHello_MultProcess) #self.SayHello_MultProcess)  # self.SayHello)
         # self.btn.pack()
-        self.btn.grid(row=6, column=0, columnspan=2)
+        self.btn.grid(row=7, column=0, columnspan=2)
 
         # Step 7. Label Name Entry
         self.ety2 = tk.Entry(topframe, width=40)
@@ -160,42 +174,49 @@ class DemoClass(tk.Tk):
                                           value='Vector',
                                           command=self.on_radiobox_changed)
         self.check_box_var1.set('Cycle')
-        self.check_box_Label.grid(row=5, column=0, sticky='E')
-        self.check_box1.grid(row=5, column=1, sticky='W')
-        self.check_box2.grid(row=5, column=1, sticky='E')
+        self.check_box_Label.grid(row=6, column=0, sticky='E')
+        self.check_box1.grid(row=6, column=1, sticky='W')
+        self.check_box2.grid(row=6, column=1, sticky='E')
 
         # Simplified Tab
         # Step 1. Please enter ATP file path and name:
         self.ety2_simple = tk.Entry(topframe_simple, width=40)
         self.ety2_simple.grid(row=0, column=0)
-
         self.btn2_simple = tk.Button(
             topframe_simple,
             text='Select ATP Files',
             command=lambda: self.CallATPFile(self.contents2_simple), width=30)
-        # self.btn2.pack()
         self.btn2_simple.grid(row=0, column=1)
-
         self.contents2_simple = StringVar()
         self.contents2_simple.set("Please Select ATP Files")
         self.ety2_simple.config(textvariable=self.contents2_simple)
-        # ATPFile = self.contents2.get()
 
         # Step 2. Please enter CSV file path and name:
         self.ety3_simple = tk.Entry(topframe_simple, width=40)
-        # self.ety3.pack()
         self.ety3_simple.grid(row=1, column=0)
-
         self.btn3_simple = tk.Button(
             topframe_simple,
             text='Select CSV Files',
             command=lambda: self.CallCSVFile(self.contents3_simple), width=30)
-        # self.btn2.pack()
         self.btn3_simple.grid(row=1, column=1)
         self.contents3_simple = StringVar()
         self.contents3_simple.set("Please Select CSV File")
         self.ety3_simple.config(textvariable=self.contents3_simple)
-        # CSVFile = self.contents3.get()
+
+        # Step 3. Please enter pinmap file path and name:
+        self.ety4_simple = tk.Entry(topframe_simple, width=40)
+        self.ety4_simple.grid(row=4, column=0)
+
+        self.btn4_simple = tk.Button(
+            topframe_simple,
+            text='Optional: Select Pinmap File',
+            command=lambda: self.CallPinmapFile(self.contents4_simple), width=30)
+        self.btn4_simple.grid(row=4, column=1)
+
+        self.contents4_simple = StringVar()
+        self.contents4_simple.set("Optional: Please Select Pinmap File")
+        self.ety4_simple.config(textvariable=self.contents4_simple)
+
 
         # Step 6, button
         self.btn_simple = tk.Button(topframe_simple, text='Generate', command=self.SayHello_simple)  # self.SayHello_simple)
@@ -232,19 +253,20 @@ class DemoClass(tk.Tk):
         UserString = self.ety2.get()
         IndexMode = self.check_box_var1.get()
         textout = self.put_data_log
-        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode, textout)
+        pinmap = self.Pinmapfilename
+        main4(ATPFile, CSVFile, PinName, Mode, TimeMode, UserString, IndexMode, textout, pinmap)
 
     def SayHello_simple(self):  # (, ATPFile, CSVFile, PinName, Mode):
         ATPFile = self.ATPfilename
         CSVFile = self.CSVfilename
-
+        pinmap = self.Pinmapfilename
         # PinName = self.ety.get()
         # Mode = self.cmb.get()
         # TimeMode = self.check_box_var2.get()  # self.cmb2.get()
         # UserString = self.ety2.get()
         # IndexMode = self.check_box_var1.get()
         textout = self.put_data_log
-        main11(ATPFile, CSVFile[0], textout)
+        main11(ATPFile, CSVFile[0], textout, pinmap)
 
     def single_item_post_process_simple(self, preFileName, tmpFileName, ATPFiles, textoutwin, Mode, CmbList, PinName,
                                         CycleRange, time_mode, IndexMode, UserString, result, j):
@@ -345,6 +367,7 @@ class DemoClass(tk.Tk):
         UserString = self.ety2.get()
         IndexMode = self.check_box_var1.get()
         textoutwin = self.put_data_log
+        PinMap = self.Pinmapfilename
 
         self.queue = Manager().Queue()
         self.counter = Manager().Value('i', 0)
@@ -352,6 +375,10 @@ class DemoClass(tk.Tk):
 
         # main4 part
         try:
+            if PinMap != "":
+                pinrounp_dict = ReadPinMap(PinMap[0])
+                if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
+                    PinName = pinrounp_dict[PinName]
             CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
                        'WFLAG',
                        'Add Opcode', 'Remove Opcode']
@@ -424,6 +451,13 @@ class DemoClass(tk.Tk):
         self.CSVfilename = tk.filedialog.askopenfilenames(
             filetypes=[('CSV File', '*.csv'), ("all", "*.*")])
         contents3.set(self.CSVfilename)
+        # print(filename)
+
+    def CallPinmapFile(self, contents3):
+        # global CSVfilename
+        self.Pinmapfilename = tk.filedialog.askopenfilenames(
+            filetypes=[('Pinmap File', '*.txt'), ("all", "*.*")])
+        contents3.set(self.Pinmapfilename)
         # print(filename)
 
     def GetFolderPath(self, contents2):

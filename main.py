@@ -340,6 +340,25 @@ def ReadCSV(something):
                 break
     return CycleRange
 
+def ReadPinMap(pinmap_dir: str):
+    pin_dict = {}
+    line_cnt = 0
+    with open(pinmap_dir, mode='r') as f:  # , encoding='UTF-8'
+        f_csv = csv.reader(f, delimiter="\t")
+        for row in f_csv:
+            if len(row) >= 2 and line_cnt >= 3:
+                if row[1] != "":
+                    key = row[1]
+                    if key in pin_dict.keys():
+                        pin_dict[key].append(row[2])
+                    else:
+                        pin_dict[key] = [row[2]]
+                # pin_dict[row[0]] = process_input_cycles(row[1])  # tmparray
+                # if
+            # else:
+            #     break
+            line_cnt += 1
+    return pin_dict
 
 def process_input_cycles(row: str):
     tmparray = row.replace('[', '').replace(']', '')
@@ -643,7 +662,11 @@ def analyse_merge_config(merge_config_file:str, textoutwin):
                 break
     return config_list
 
-def main11(ATPFiles, merge_config_file, textoutwin):
+def main11(ATPFiles, merge_config_file, textoutwin, PinMap):
+    # check pin group
+    if PinMap != "":
+        pinrounp_dict = ReadPinMap(PinMap[0])
+
     # use to process merge-setup format input
     config_list = analyse_merge_config(merge_config_file, textoutwin)
 
@@ -660,6 +683,12 @@ def main11(ATPFiles, merge_config_file, textoutwin):
         PinName = config_item["PinName"]
         CycleRange = config_item["CycleRange"]
         TimeMode = config_item["TimeMode"]
+
+        # check pin group
+        if PinMap != "":
+            if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
+                PinName = pinrounp_dict[PinName]
+
         if TimeMode == 'Single':
             time_mode = '1'
         elif TimeMode == 'Dual':
@@ -695,11 +724,15 @@ def main11(ATPFiles, merge_config_file, textoutwin):
     return result
 
 
-def main4(ATPFiles, CSVFiles, PinName, Mode, TimeMode, UserString, IndexMode, textoutwin):
+def main4(ATPFiles, CSVFiles, PinName:str, Mode, TimeMode, UserString, IndexMode, textoutwin, PinMap):
     # ATPFiles = []
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
     # GetFiles(CSVFiles, Dir, ".csv")
+    if PinMap != "":
+        pinrounp_dict = ReadPinMap(PinMap[0])
+        if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
+            PinName = pinrounp_dict[PinName]
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
                'Add Opcode', 'Remove Opcode']
     if TimeMode == 'Single':

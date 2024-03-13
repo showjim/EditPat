@@ -30,6 +30,8 @@ def main():
         st.session_state["ZipFilesName"] = ""
     if "PAE_logprint" not in st.session_state:
         st.session_state["PAE_logprint"] = ""
+    if "PinmapFile" not in st.session_state:
+        st.session_state["PinmapFile"] = ""
     work_path = os.path.abspath('.')
     OutputPath = os.path.join(work_path, "tempDir")
     if not os.path.exists(OutputPath):  # check the directory is existed or not
@@ -111,7 +113,7 @@ def main():
         },
     )
 
-    ## 2.2
+    ## 2.2 CSV config
     file_path = st.file_uploader("`2.2. Or Upload a CSV config file`",
                                  type=["csv"])
     if st.button("Upload CSV"):
@@ -120,12 +122,27 @@ def main():
 
     st.session_state["CSVFileTab"] = edited_df
 
+    ##2.3 (optional) select pinmap
+    pinmap_path = st.file_uploader("`2.3. (Optional) Upload a pin map file`",
+                                 type=["txt"])
+    if st.button("(Optional) Upload Pinmap"):
+        if pinmap_path is not None:
+            # save file
+            with st.spinner('Saving file'):
+                uploaded_path = os.path.join(OutputPath, pinmap_path.name)
+                with open(uploaded_path, mode="wb") as f:
+                    f.write(pinmap_path.getbuffer())
+
+                st.session_state["PinmapFile"] = uploaded_path
+                st.write(f"✅ {Path(uploaded_path).name} uploaed")
+
+
     # Step 3. Run post-process
     st.subheader('Step 3. Run post-process')
     if st.button("Run Post-Process"):
         merge_config_file = os.path.join(OutputPath, "sample.csv")
         merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
-        result_fils = main11(st.session_state["FileList"], merge_config_file, send_log) #print_info)
+        result_fils = main11(st.session_state["FileList"], merge_config_file, send_log, st.session_state["PinmapFile"]) #print_info)
         st.session_state["ResultFiles"] = result_fils
         st.session_state["ZipFilesFlag"] = True
 
