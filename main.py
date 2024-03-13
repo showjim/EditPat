@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 
-def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString=''):
+def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, IndexMode, UserString='', PinNameOri=""):
     result = False
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
@@ -60,14 +60,14 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                             NewATPfile.write("\n")
                             NewATPfile.write("instruments = {\n")
                             NewATPfile.write(
-                                "({0}):DigCap {1}:auto_trig_enable;\n".format(PinName, len(PinNameList)))
+                                "({0}):DigCap {1}:auto_trig_enable;\n".format(PinNameOri, len(PinNameList)))
                             NewATPfile.write("}\n")
                         elif Mode == 'DSSC Source':
                             PinNameList = PinName.split(',')
                             NewATPfile.write("\n")
                             NewATPfile.write("instruments = {\n")
                             NewATPfile.write(
-                                "({0}):DigSrc {1};\n".format(PinName, len(PinNameList)))
+                                "({0}):DigSrc {1};\n".format(PinNameOri, len(PinNameList)))
                             NewATPfile.write("}\n")
                         elif Mode == 'CMEM/HRAM Capture':
                             # do nothing here
@@ -123,7 +123,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                     # add DigSrc Signaal
                     if (CycleNum == 1) and (Mode == 'DSSC Source'):
                         line = "(({0}):DigSrc = Start DSSCSrcSig)".format(
-                            PinName) + line
+                            PinNameOri) + line
 
                     # add wflag setup
                     if Mode == 'WFLAG':
@@ -157,7 +157,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                                 LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
-                                    line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
+                                    line = "(({0}):DigCap = Store)".format(PinNameOri) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                     #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
@@ -178,7 +178,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                                 LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "V"
-                                    line = "(({0}):DigCap = Store)".format(PinName) + " ".join(line_list) + "\n"
+                                    line = "(({0}):DigCap = Store)".format(PinNameOri) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "V" + line[ModifyIndex + 1:]
                                     #     if line[ModifyIndex] == '0' or line[ModifyIndex] == '1':
@@ -201,7 +201,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                                 LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "D"
-                                    line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
+                                    line = "(({0}):DigSrc = Send)".format(PinNameOri) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
                                     #     if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
@@ -222,7 +222,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                                 LineIndex) + ", and pin data index " + str(k))
                                         else:
                                             line_list[start_index + 1 + k + 1] = "D"
-                                    line = "(({0}):DigSrc = Send)".format(PinName) + " ".join(line_list) + "\n"
+                                    line = "(({0}):DigSrc = Send)".format(PinNameOri) + " ".join(line_list) + "\n"
                                     # for ModifyIndex in ModifyIndexList:
                                     #     line = line[0:ModifyIndex] + "D" + line[ModifyIndex + 1:]
                                     #     if line[ModifyIndex] == 'H' or line[ModifyIndex] == 'L':
@@ -685,9 +685,10 @@ def main11(ATPFiles, merge_config_file, textoutwin, PinMap):
         TimeMode = config_item["TimeMode"]
 
         # check pin group
+        PinNameOri = PinName
         if PinMap != "":
             if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
-                PinName = pinrounp_dict[PinName]
+                PinName = ",".join(pinrounp_dict[PinName])
 
         if TimeMode == 'Single':
             time_mode = '1'
@@ -709,7 +710,7 @@ def main11(ATPFiles, merge_config_file, textoutwin, PinMap):
             print("Info: start convert file: +" + ATPFiles[j])
             if Mode in CmbList:
                 result_file = EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode,
-                                          UserString)
+                                          UserString, PinNameOri)
                 preFileName = tmpFileName
                 if result_file not in result:
                     result.append(result_file)
@@ -729,10 +730,11 @@ def main4(ATPFiles, CSVFiles, PinName:str, Mode, TimeMode, UserString, IndexMode
     # CSVFiles = []
     # GetFiles(ATPFiles, Dir, ".atp")
     # GetFiles(CSVFiles, Dir, ".csv")
+    PinNameOri = PinName # pin group name possible
     if PinMap != "":
         pinrounp_dict = ReadPinMap(PinMap[0])
         if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
-            PinName = pinrounp_dict[PinName]
+            PinName = ",".join(pinrounp_dict[PinName])
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
                'Add Opcode', 'Remove Opcode']
     if TimeMode == 'Single':
@@ -753,7 +755,7 @@ def main4(ATPFiles, CSVFiles, PinName:str, Mode, TimeMode, UserString, IndexMode
             textoutwin("Info: Start convert file: " + ATPFiles[j])
             print("Info: start convert file: +" + ATPFiles[j])
             if Mode in CmbList:
-                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, time_mode, IndexMode, UserString)
+                EditPattern(textoutwin, PinName, ATPFiles[j], CycleRanges[key], Mode, time_mode, IndexMode, UserString, PinNameOri)
             else:
                 textoutwin("Error: Wrong Choice !!!")
                 print("Error: Wrong Choice !!!")

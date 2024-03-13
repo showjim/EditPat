@@ -375,10 +375,11 @@ class DemoClass(tk.Tk):
 
         # main4 part
         try:
+            PinNameOri = PinName
             if PinMap != "":
                 pinrounp_dict = ReadPinMap(PinMap[0])
                 if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
-                    PinName = pinrounp_dict[PinName]
+                    PinName = ",".join(pinrounp_dict[PinName])
             CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
                        'WFLAG',
                        'Add Opcode', 'Remove Opcode']
@@ -404,7 +405,7 @@ class DemoClass(tk.Tk):
                         self.total_tasks += 1
                         self.pool.apply_async(EditPattern, args=(
                             self.queue.put, PinName, ATPFiles[j], CycleRanges[key], Mode, timemode, IndexMode,
-                            UserString), callback=self.my_callback)
+                            UserString, PinNameOri), callback=self.my_callback)
                     else:
                         textoutwin("Error: Wrong Choice !!!")
                         print("Error: Wrong Choice !!!")
