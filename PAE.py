@@ -15,7 +15,7 @@ from multiprocessing import Pool, Manager
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.5'
+version = 'V1.12.6'
 
 
 class DemoClass(tk.Tk):
@@ -25,6 +25,7 @@ class DemoClass(tk.Tk):
         self.ATPfilename = []
         self.CSVfilename = []
         self.createWidgets()
+        self.Pinmapfilename = ""
 
     def createWidgets(self):
         self.title('Pattern Auto Edit Tool ' + version)

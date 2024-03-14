@@ -148,7 +148,10 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
                                     # line[ModifyIndex] = "V"
                                     line_list = line.split()
                                     for k in Index:
-                                        start_index = line_list.index(">")
+                                        try:
+                                            start_index = line_list.index(">")
+                                        except Exception as e:
+                                            print(e)
                                         if line_list[start_index + 1 + k + 1] == '0' or line_list[
                                             start_index + 1 + k + 1] == '1':
                                             textoutwin("Warning: Drive data found in DigCap, line " + str(
