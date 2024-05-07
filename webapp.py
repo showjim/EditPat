@@ -32,6 +32,17 @@ def main():
         st.session_state["PAE_logprint"] = ""
     if "PinmapFile" not in st.session_state:
         st.session_state["PinmapFile"] = ""
+
+    # Sidebar for menu options
+    with st.sidebar:
+        st.header("Other Tools")
+        st.page_link("https://taishanstone:8502", label="Check INFO Tool", icon="1️⃣")
+        st.page_link("https://taishanstone:8503", label="Shmoo Detect Tool", icon="2️⃣")
+        st.header("Help")
+        if st.button("About"):
+            st.info(
+                "Thank you for using!\nCreated by Chao Zhou.\nAny suggestions please mail zhouchao486@gmail.com]")
+
     work_path = os.path.abspath('.')
     OutputPath = os.path.join(work_path, "tempDir")
     if not os.path.exists(OutputPath):  # check the directory is existed or not
