@@ -36,7 +36,7 @@ def main():
     # Sidebar for menu options
     with st.sidebar:
         st.header("Other Tools")
-        st.page_link("http://taishanstone:8502", label="Check INFO Tool", icon="1️⃣")
+        st.page_link("http://taishanstone:8501", label="Check INFO Tool", icon="1️⃣")
         st.page_link("http://taishanstone:8503", label="Shmoo Detect Tool", icon="2️⃣")
         st.header("Help")
         if st.button("About"):
