@@ -44,7 +44,7 @@ def main():
                 "Thank you for using!\nCreated by Chao Zhou.\nAny suggestions please mail zhouchao486@gmail.com]")
 
     work_path = os.path.abspath('.')
-    OutputPath = os.path.join(work_path, "tempDir")
+    OutputPath = os.path.join(work_path, "workDir")
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
 
