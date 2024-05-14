@@ -1,0 +1,34 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags:
+      - V*
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        # GitHub Repo => Settings => Secrets 增加 docker hub 登录密钥信息
+        # DOCKERHUB_USERNAME 是 docker hub 账号名.
+        # DOCKERHUB_TOKEN: docker hub => Account Setting => Security 创建.
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    # 通过 git 命令获取当前 tag 信息, 存入环境变量 APP_VERSION
+    - name: Generate App Version
+      run: echo APP_VERSION=`git describe --tags --always` >> $GITHUB_ENV
+    # 构建 Docker 并推送到 Docker hub
+    - name: Build and push the Docker image
+      uses: docker/build-push-action@v5
+      with:
+          push: true
+          tags: showjimzc/edit_pat_webapp:${{ env.APP_VERSION }}
+      # run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
