@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua
 EXPOSE 8501
 
 # 运行 Streamlit 应用
-CMD ["streamlit", "run", "webapp.py"]
+CMD ["streamlit", "run", "PAE_webapp.py"]
 
 # 健康检查
 HEALTHCHECK --interval=5m --timeout=3s \
