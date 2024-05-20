@@ -141,7 +141,7 @@ def main():
                                  type=["csv"])
     if st.button("Upload CSV"):
         csv_config = pd.read_csv(file_path)
-        csv_config.fillna("",inplace=True)
+        csv_config.fillna("", inplace=True) # in case cannot edit in cell bug
         st.session_state["CSVFileTab"] = csv_config
         # edited_df = edited_placeholder.data_editor(csv_config, num_rows="dynamic")
 
