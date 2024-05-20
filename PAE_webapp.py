@@ -90,7 +90,7 @@ def main():
     # Step 2. Upload or create CSV config file
     st.subheader('Step 2. Upload or create CSV config file')
     ## 2.1
-    st.write('`2.1. Uconfig table`')
+    st.write('`2.1. Config table`')
     edited_placeholder = st.empty()
     if st.session_state["InitCSVFileFlag"] == False:
         df = pd.DataFrame(
@@ -102,9 +102,60 @@ def main():
         )
         st.session_state["CSVFileTab"] = df
         st.session_state["InitCSVFileFlag"] = True
+
+    # def df_on_change(df):
+    #     state = st.session_state["df_editor"]
+    #     for index, updates in state["edited_rows"].items():
+    #         # st.session_state["CSVFileTab"].loc[st.session_state["CSVFileTab"].index == index, "edited"] = True
+    #         for key, value in updates.items():
+    #             st.session_state["CSVFileTab"].loc[st.session_state["CSVFileTab"].index == index, key] = value
+    #
+    # CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG']
+    # df = st.session_state["CSVFileTab"]
+    # edited_df = edited_placeholder.data_editor(
+    #     st.session_state["CSVFileTab"],
+    #     key = "df_editor",
+    #     num_rows="dynamic",
+    #     column_config={
+    #         "Process Type": st.column_config.SelectboxColumn(
+    #             "Process Type",
+    #             help="How would you like to process ATP file",
+    #             width="medium",
+    #             options=CmbList,
+    #             required=True,
+    #         ),
+    #         "Process Type 2": st.column_config.SelectboxColumn(
+    #             "Process Type 2",
+    #             help="How would you like to process ATP file",
+    #             width="medium",
+    #             options=CmbList,
+    #             required=False,
+    #         ),
+    #     },
+    #     on_change = df_on_change, args = [df]
+    # )
+    # st.session_state["CSVFileTab"] = edited_df
+
+    ## 2.2 CSV config
+    file_path = st.file_uploader("`2.2. Or Upload a CSV config file`",
+                                 type=["csv"])
+    if st.button("Upload CSV"):
+        csv_config = pd.read_csv(file_path)
+        st.session_state["CSVFileTab"] = csv_config
+        # edited_df = edited_placeholder.data_editor(csv_config, num_rows="dynamic")
+
+    def df_on_change(df):
+        state = st.session_state["df_editor"]
+        for index, updates in state["edited_rows"].items():
+            # st.session_state["CSVFileTab"].loc[st.session_state["CSVFileTab"].index == index, "edited"] = True
+            for key, value in updates.items():
+                st.session_state["CSVFileTab"].loc[st.session_state["CSVFileTab"].index == index, key] = value
+
     CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG']
+    df = st.session_state["CSVFileTab"]
     edited_df = edited_placeholder.data_editor(
         st.session_state["CSVFileTab"],
+        key = "df_editor",
         num_rows="dynamic",
         column_config={
             "Process Type": st.column_config.SelectboxColumn(
@@ -122,16 +173,11 @@ def main():
                 required=False,
             ),
         },
+        on_change = df_on_change, args = [df],
+        use_container_width=True,
+        height=200,
     )
-
-    ## 2.2 CSV config
-    file_path = st.file_uploader("`2.2. Or Upload a CSV config file`",
-                                 type=["csv"])
-    if st.button("Upload CSV"):
-        csv_config = pd.read_csv(file_path)
-        edited_df = edited_placeholder.data_editor(csv_config, num_rows="dynamic")
-
-    st.session_state["CSVFileTab"] = edited_df
+    # st.session_state["CSVFileTab"] = edited_df
 
     ##2.3 (optional) select pinmap
     pinmap_path = st.file_uploader("`2.3. (Optional) Upload a pin map file`",
