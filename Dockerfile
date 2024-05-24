@@ -33,5 +33,5 @@ EXPOSE 8501
 CMD ["streamlit", "run", "PAE_webapp.py"]
 
 # 健康检查
-HEALTHCHECK --interval=5m --timeout=3s \
+HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost:8501/ || exit 1
