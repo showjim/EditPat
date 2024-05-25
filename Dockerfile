@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     software-properties-common \
     tk \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制应用文件到容器中
