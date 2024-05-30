@@ -46,7 +46,7 @@ def main():
 
 The user assumes all risks associated with the use of this tool, and the developer will not be liable for any damages, including but not limited to direct, indirect, special, incidental, or consequential damages, arising out of the use or inability to use this tool.
 
-The developer welcomes feedback and bug reports from users. If you encounter any issues or have any suggestions, please contact us at [developer's email address]. Your input will help us improve the tool and provide a better user experience.
+The developer welcomes feedback and bug reports from users. If you encounter any issues or have any suggestions, please contact me at Teams. Your input will help us improve the tool and provide a better user experience.
 
 By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read and understood this disclaimer and agree to be bound by its terms.""",
                    icon="⚠️")
