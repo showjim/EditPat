@@ -326,10 +326,8 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     return otherthing
 
 def copy_and_rename_os(src_path, dest_path):
-    # Create Path objects
-    src_path = Path(src_path)
-    dest_path = Path(dest_path)
-    src_path.rename(dest_path)
+    shutil.copy(src_path, dest_path)
+    shutil.move(src_path, dest_path)
 
 def Check_tset_line(tset_list, line):
     ii = -1
