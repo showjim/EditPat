@@ -14,28 +14,38 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     OutputPath = os.getcwd() + '/Output'
     if not os.path.exists(OutputPath):  # check the directory is existed or not
         os.mkdir(OutputPath)
-    if Mode == 'Expand Pattern':
-        RemoveRepeat(something, timemode)
-        RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
-        return result
-    if Mode == 'Compress Pattern':
-        AddReapt(something, timemode)
-        return result
-
-    if Mode == 'Remove Opcode':
-        RemoveOpcode(something, UserString)
-        return result
 
     # CycleRange = ReadCSV(CSVFile)
     otherthing = os.path.join(OutputPath, os.path.basename(something))
+
+    if Mode == 'Expand Pattern':
+        RemoveRepeatFile = RemoveRepeat(something, timemode)
+        # RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
+        copy_and_rename_os(RemoveRepeatFile, otherthing)
+        if os.path.exists(RemoveRepeatFile):
+            os.remove(RemoveRepeatFile)
+        return otherthing
+    if Mode == 'Compress Pattern':
+        AddRepeatFile = AddReapt(something, timemode)
+        copy_and_rename_os(AddRepeatFile, otherthing)
+        if os.path.exists(AddRepeatFile):
+            os.remove(AddRepeatFile)
+        return otherthing
+
+    if Mode == 'Remove Opcode':
+        RemoveOpcodeFile = RemoveOpcode(something, UserString)
+        copy_and_rename_os(RemoveOpcodeFile, otherthing)
+        if os.path.exists(RemoveOpcodeFile):
+            os.remove(RemoveOpcodeFile)
+        return otherthing
 
     LineIndex = 0
     CycleNum = 0
     RepeatCnt = 0
     # remove all "repeat" opcode first
     if IndexMode == 'Cycle':
-        RemoveRepeat(something, timemode)
-        RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('temp_RemoveRepeat.atp')
+        RemoveRepeatFile = RemoveRepeat(something, timemode)
+        # RemoveRepeatFile = something.replace(r'.atp', r'_RemoveRepeat.atp')  # os.path.realpath('temp_RemoveRepeat.atp')
     else:
         RemoveRepeatFile = something
     with openfile(otherthing, mode='w') as NewATPfile:
@@ -315,6 +325,11 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     print("Info: Done conversion: " + something)
     return otherthing
 
+def copy_and_rename_os(src_path, dest_path):
+    # Create Path objects
+    src_path = Path(src_path)
+    dest_path = Path(dest_path)
+    src_path.rename(dest_path)
 
 def Check_tset_line(tset_list, line):
     ii = -1
@@ -416,6 +431,7 @@ def RemoveOpcode(something, UserString):
                 if tmpLine.strip().startswith(UserString):
                     tmpLine = tmpLine.replace(UserString, '')
                 NewATPfile.write(tmpLine)
+    return otherthing
 
 
 def openfile(filename, mode='r'):
@@ -487,6 +503,7 @@ def RemoveRepeat(something, timemode):
 
                         if (line[-1].find(r'}') != -1) or line[-1] == '':
                             Boby_Flag = False
+    return otherthing
 
 
 def AddReapt(something, timemode):
@@ -560,7 +577,7 @@ def AddReapt(something, timemode):
                             NewATPfile.write('{0}'.format(line[i]))
 
                     PrevLine = line
-
+    return otherthing
 
 def GetRepeatCnt(line):
     RepeatCnt = 0
@@ -653,12 +670,16 @@ def analyse_merge_config(merge_config_file:str, textoutwin):
                             cur_config_dict["ATPFile"] = item
                         elif i == 3 or i == 6:
                             cur_config_dict["Mode"] = item
+                            if "Pattern" in item: #'Expand Pattern'  'Compress Pattern':
+                                tmp_dict = cur_config_dict.copy()
+                                config_list.append(tmp_dict)
                         elif i == 4 or i == 7:
                             cur_config_dict["PinName"] = item
                         elif i == 5 or i == 8:
                             cur_config_dict["CycleRange"] = process_input_cycles(item)
-                            tmp_dict = cur_config_dict.copy()
-                            config_list.append(tmp_dict)
+                            if "Pattern" not in item:
+                                tmp_dict = cur_config_dict.copy()
+                                config_list.append(tmp_dict)
 
             else:
                 textoutwin("Warning: NO CONFIG FOUND!!!")

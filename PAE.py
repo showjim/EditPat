@@ -15,7 +15,7 @@ from multiprocessing import Pool, Manager
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.10'
+version = 'V1.12.11'
 
 
 class DemoClass(tk.Tk):
