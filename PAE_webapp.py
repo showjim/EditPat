@@ -41,6 +41,16 @@ def main():
     st.caption('Powered by Streamlit, written by Chao Zhou')
     st.subheader("", divider='rainbow')
 
+    with st.expander("Disclaimer", True):
+        st.warning("""The developer of this efficiency tool has taken all reasonable measures to ensure its quality and functionality. However, it is provided "as is" and the developer makes no representations or warranties of any kind, express or implied, as to its accuracy, reliability, or suitability for a particular purpose.
+
+The user assumes all risks associated with the use of this tool, and the developer will not be liable for any damages, including but not limited to direct, indirect, special, incidental, or consequential damages, arising out of the use or inability to use this tool.
+
+The developer welcomes feedback and bug reports from users. If you encounter any issues or have any suggestions, please contact us at [developer's email address]. Your input will help us improve the tool and provide a better user experience.
+
+By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read and understood this disclaimer and agree to be bound by its terms.""",
+                   icon="⚠️")
+
     if not check_password():
         st.stop()  # Do not continue if check_password is not True.
 
