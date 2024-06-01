@@ -4,6 +4,15 @@ on:
   push:
     tags:
       - V*
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+      tags:
+        description: "Test scenario tags"
 
 jobs:
 
@@ -30,5 +39,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
           push: true
-          tags: showjimzc/edit_pat_webapp:${{ env.APP_VERSION }}
+          tags: |
+            showjimzc/edit_pat_webapp:${{ env.APP_VERSION }}
+            showjimzc/edit_pat_webapp:latest
       # run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
