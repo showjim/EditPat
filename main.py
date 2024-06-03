@@ -21,20 +21,20 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     if Mode == 'Expand Pattern':
         RemoveRepeatFile = RemoveRepeat(something, timemode)
         # RemoveRepeatFile = os.path.realpath('new_RemoveRepeat.atp')
-        copy_and_rename_os(RemoveRepeatFile, otherthing)
+        copy_and_rename(RemoveRepeatFile, otherthing)
         if os.path.exists(RemoveRepeatFile):
             os.remove(RemoveRepeatFile)
         return otherthing
     if Mode == 'Compress Pattern':
         AddRepeatFile = AddReapt(something, timemode)
-        copy_and_rename_os(AddRepeatFile, otherthing)
+        copy_and_rename(AddRepeatFile, otherthing)
         if os.path.exists(AddRepeatFile):
             os.remove(AddRepeatFile)
         return otherthing
 
     if Mode == 'Remove Opcode':
         RemoveOpcodeFile = RemoveOpcode(something, UserString)
-        copy_and_rename_os(RemoveOpcodeFile, otherthing)
+        copy_and_rename(RemoveOpcodeFile, otherthing)
         if os.path.exists(RemoveOpcodeFile):
             os.remove(RemoveOpcodeFile)
         return otherthing
@@ -325,7 +325,7 @@ def EditPattern(textoutwin, PinName, something, CycleRange, Mode, timemode, Inde
     print("Info: Done conversion: " + something)
     return otherthing
 
-def copy_and_rename_os(src_path, dest_path):
+def copy_and_rename(src_path, dest_path):
     shutil.copy(src_path, dest_path)
     shutil.move(src_path, dest_path)
 
@@ -671,13 +671,21 @@ def analyse_merge_config(merge_config_file:str, textoutwin):
                             if "Pattern" in item: #'Expand Pattern'  'Compress Pattern':
                                 tmp_dict = cur_config_dict.copy()
                                 config_list.append(tmp_dict)
+                                # reset possible conflict info
+                                cur_config_dict["CycleRange"] = None
+                                cur_config_dict["Mode"] = ""
+                                cur_config_dict["PinName"] = ""
                         elif i == 4 or i == 7:
                             cur_config_dict["PinName"] = item
                         elif i == 5 or i == 8:
                             cur_config_dict["CycleRange"] = process_input_cycles(item)
-                            if "Pattern" not in item:
+                            if "Pattern" not in item: #'Expand Pattern'  'Compress Pattern':
                                 tmp_dict = cur_config_dict.copy()
                                 config_list.append(tmp_dict)
+                                # reset possible conflict info
+                                cur_config_dict["CycleRange"] = None
+                                cur_config_dict["Mode"] = ""
+                                cur_config_dict["PinName"] = ""
 
             else:
                 textoutwin("Warning: NO CONFIG FOUND!!!")
@@ -720,19 +728,30 @@ def main11(ATPFiles, merge_config_file, textoutwin, PinMap):
         UserString = ""
         j = InList(tmpFileName, ATPFiles)
 
+        PrcsFileName = ATPFiles[j]
         # if some  name as previous, then copy output of previous to src path
         if preFileName == tmpFileName:
             OutputPath = os.path.join(os.getcwd(), 'Output')
             otherthing = os.path.join(OutputPath, os.path.basename(ATPFiles[j]))
-            shutil.copy(otherthing, ATPFiles[j])
+            # shutil.copy(otherthing, ATPFiles[j])
+            PrcsFileName = ATPFiles[j].replace(r'.atp', r'_1stpostprcs.atp')
+            copy_and_rename(otherthing, PrcsFileName)
 
         # go~ and run process function
         if j >= 0:
-            textoutwin("Info: Start convert file: " + ATPFiles[j])
-            print("Info: start convert file: +" + ATPFiles[j])
+            textoutwin("Info: Start convert file: " + PrcsFileName)
+            print("Info: start convert file: +" + PrcsFileName)
             if Mode in CmbList:
-                result_file = EditPattern(textoutwin, PinName, ATPFiles[j], CycleRange, Mode, time_mode, IndexMode,
+                result_file = EditPattern(textoutwin, PinName, PrcsFileName, CycleRange, Mode, time_mode, IndexMode,
                                           UserString, PinNameOri)
+                # Check is it the temp file from dual post process
+                if result_file.endswith(r"_1stpostprcs.atp"):
+                    if os.path.exists(PrcsFileName):
+                        os.remove(PrcsFileName)
+                    DualPostPrcsFile = result_file.replace(r'_1stpostprcs.atp',r'.atp')
+                    copy_and_rename(result_file, DualPostPrcsFile)
+                    result_file = DualPostPrcsFile
+
                 preFileName = tmpFileName
                 if result_file not in result:
                     result.append(result_file)
