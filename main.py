@@ -347,11 +347,14 @@ def ReadCSV(something):
         f_csv = csv.reader(f)
         for row in f_csv:
             if len(row) > 0:
-                # tmparray = row[1].replace('[', '').replace(']', '')
-                # tmparray = tmparray.split(';')
-                # tmparray = [x.split('-') for x in tmparray]
-                # tmparray = [sorted([int(y) for y in x]) for x in tmparray]
-                CycleRange[row[0]] = process_input_cycles(row[1])  # tmparray
+                if len(row[0]) or len(row[1]) > 0:
+                    # tmparray = row[1].replace('[', '').replace(']', '')
+                    # tmparray = tmparray.split(';')
+                    # tmparray = [x.split('-') for x in tmparray]
+                    # tmparray = [sorted([int(y) for y in x]) for x in tmparray]
+                    CycleRange[row[0]] = process_input_cycles(row[1])  # tmparray
+                else:
+                    break
             else:
                 break
     return CycleRange
