@@ -381,6 +381,8 @@ def ReadPinMap(pinmap_dir: str):
 
 def process_input_cycles(row: str):
     tmparray = row.replace('[', '').replace(']', '')
+    if tmparray.endswith(";"):
+        tmparray = tmparray[:-1]
     tmparray = tmparray.split(';')
     tmparray = [x.split('-') for x in tmparray]
     tmparray = [sorted([int(y) for y in x]) for x in tmparray]
