@@ -5,7 +5,8 @@ import streamlit as st
 import pandas as pd
 import os
 from pathlib import Path
-from src.main import main11, get_all_files_list, make_zip
+from src.main import main11
+from src.file_ops import  get_all_files_list, make_zip
 from PAE import version
 
 

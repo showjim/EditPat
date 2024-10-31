@@ -5,8 +5,8 @@ import csv
 import os
 import re
 from typing import Dict, List
-from file_ops import openfile
-from utils import process_input_cycles
+from src.file_ops import openfile
+from src.utils import process_input_cycles
 
 def read_csv(something: str) -> Dict:
     """Read CSV file containing cycle ranges"""

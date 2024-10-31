@@ -4,9 +4,9 @@ Pattern processing module for ATP file modifications
 import os
 import re
 from typing import List, Any, Tuple
-from file_ops import openfile, copy_and_rename
-from utils import get_repeat_cnt, cmp, check_in_range, check_in_same_range
-from atp_handler import find_pin_index
+from src.file_ops import openfile, copy_and_rename
+from src.utils import get_repeat_cnt, cmp, check_in_range, check_in_same_range
+from src.atp_handler import find_pin_index
 
 def remove_opcode(something: str, user_string: str) -> str:
     """Remove specified opcode from ATP file"""

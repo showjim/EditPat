@@ -4,10 +4,9 @@ Created on Dec 8, 2015
 @author: zhouchao
 '''
 from typing import List, Any
-from file_ops import get_all_files_list, make_zip
-from utils import in_list
-from atp_handler import read_csv, read_pinmap, analyse_merge_config
-from pattern_processor import edit_pattern
+from src.utils import in_list
+from src.atp_handler import read_csv, read_pinmap, analyse_merge_config
+from src.pattern_processor import edit_pattern
 
 def main4(atp_files: List[str], csv_files: List[str], pin_name: str, mode: str, 
           time_mode: str, user_string: str, index_mode: str, textoutwin: Any, pin_map: str) -> None:
