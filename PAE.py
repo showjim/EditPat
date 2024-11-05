@@ -241,7 +241,7 @@ class DemoClass(tk.Tk):
         CSVFile = self.CSVfilename
         pinmap = self.Pinmapfilename
         textout = self.put_data_log
-        main11(ATPFile, CSVFile[0], textout, pinmap)
+        main11(ATPFile, CSVFile[0], textout, pinmap[0])
 
     def single_item_post_process_simple(self, preFileName, tmpFileName, ATPFiles, textoutwin, Mode, CmbList, PinName,
                                         CycleRange, time_mode, IndexMode, UserString, result, j):
