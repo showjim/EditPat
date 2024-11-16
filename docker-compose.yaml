@@ -1,0 +1,12 @@
+services:
+  pae:
+    image: showjimzc/edit_pat_webapp:latest
+    container_name: patAutoEditTool
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /home/jerry/workDir:/app/workDir
+      - /home/jerry/Output:/app/Output
+    restart: always
+    ports:
+      - 8501:8501
