@@ -20,7 +20,7 @@ from src.main import main4, main11
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.20'
+version = 'V1.12.21'
 
 class DemoClass(tk.Tk):
 
@@ -29,7 +29,7 @@ class DemoClass(tk.Tk):
         self.ATPfilename = []
         self.CSVfilename = []
         self.createWidgets()
-        self.Pinmapfilename = ""
+        self.Pinmapfilename = [] #""
 
     def createWidgets(self):
         self.title('Pattern Auto Edit Tool ' + version)
@@ -241,7 +241,10 @@ class DemoClass(tk.Tk):
         CSVFile = self.CSVfilename
         pinmap = self.Pinmapfilename
         textout = self.put_data_log
-        main11(ATPFile, CSVFile[0], textout, pinmap[0])
+        if len(pinmap) > 0:
+            main11(ATPFile, CSVFile[0], textout, pinmap[0])
+        else:
+            main11(ATPFile, CSVFile[0], textout, "")
 
     def single_item_post_process_simple(self, preFileName, tmpFileName, ATPFiles, textoutwin, Mode, CmbList, PinName,
                                         CycleRange, time_mode, IndexMode, UserString, result, j):
