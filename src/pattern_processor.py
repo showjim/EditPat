@@ -204,7 +204,7 @@ def edit_pattern(textoutwin: Any, pin_name: str, something: str, cycle_range: Li
                                     new_atp_file.write("}\n")
 
                         elif line.find("$tset") != -1:
-                            index = find_pin_index(pin_name, line, textoutwin)
+                            index = find_pin_index(mode, pin_name, line, textoutwin)
                             if 0 in index:
                                 textoutwin('Error: Cannot find pinname')
                                 print('Error: Cannot find pinname')

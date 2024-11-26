@@ -87,7 +87,7 @@ def analyse_merge_config(merge_config_file: str, textoutwin) -> List[Dict]:
                 break
     return config_list
 
-def find_pin_index(pin_names: str, str_line: str, textoutwin) -> List[int]:
+def find_pin_index(mode:str, pin_names: str, str_line: str, textoutwin) -> List[int]:
     """Find pin indices in line"""
     pin_name = pin_names.split(",")
     str_line = str_line.replace(' ', '')
@@ -100,7 +100,7 @@ def find_pin_index(pin_names: str, str_line: str, textoutwin) -> List[int]:
             if tmparray[x] == pin_name[i]:
                 index.append(x)
                 
-    if len(index) != len(pin_name):
+    if (len(index) != len(pin_name)) and (mode != 'WFLAG'):
         index = []
         textoutwin("Error: Cannot find all given pins")
         print("Error: Cannot find all given pins")

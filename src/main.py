@@ -3,10 +3,12 @@ Main module for ATP file processing
 Created on Dec 8, 2015
 @author: zhouchao
 '''
+import os
 from typing import List, Any
 from src.utils import in_list
 from src.atp_handler import read_csv, read_pinmap, analyse_merge_config
 from src.pattern_processor import edit_pattern
+from src.file_ops import copy_and_rename
 
 def main4(atp_files: List[str], csv_files: List[str], pin_name: str, mode: str, 
           time_mode: str, user_string: str, index_mode: str, textoutwin: Any, pin_map: str) -> None:
@@ -52,9 +54,11 @@ def main4(atp_files: List[str], csv_files: List[str], pin_name: str, mode: str,
 
 def main11(atp_files: List[str], merge_config_file: str, textoutwin: Any, pin_map: str) -> List[str]:
     """Process ATP files according to merge configuration file"""
+    # check pin group
     if pin_map != "":
         pinrounp_dict = read_pinmap(pin_map)
 
+    # use to process merge-setup format input
     config_list = analyse_merge_config(merge_config_file, textoutwin)
 
     cmb_list = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 
@@ -63,12 +67,14 @@ def main11(atp_files: List[str], merge_config_file: str, textoutwin: Any, pin_ma
     pre_file_name = ""
     result = []
     for config_item in config_list:
+        # initial parameters
         tmp_file_name = config_item["ATPFile"]
         mode = config_item["Mode"]
         pin_name = config_item["PinName"]
         cycle_range = config_item["CycleRange"]
         time_mode = config_item["TimeMode"]
 
+        # check pin group
         pin_name_ori = pin_name
         if pin_map != "":
             if ("," not in pin_name) and (pin_name in pinrounp_dict.keys()):
@@ -82,11 +88,21 @@ def main11(atp_files: List[str], merge_config_file: str, textoutwin: Any, pin_ma
         user_string = ""
         j = in_list(tmp_file_name, atp_files)
 
+        prcs_file_name = atp_files[j]
+        # if some  name as previous, then copy output of previous to src path
+        if pre_file_name == tmp_file_name:
+            OutputPath = os.path.join(os.getcwd(), 'Output')
+            otherthing = os.path.join(OutputPath, os.path.basename(atp_files[j]))
+            # shutil.copy(otherthing, ATPFiles[j])
+            prcs_file_name = atp_files[j].replace(r'.atp', r'_1stpostprcs.atp')
+            copy_and_rename(otherthing, prcs_file_name)
+
+        # go~ and run process function
         if j >= 0:
-            textoutwin("Info: Start convert file: " + atp_files[j])
-            print("Info: start convert file: +" + atp_files[j])
+            textoutwin("Info: Start convert file: " + prcs_file_name)
+            print("Info: start convert file: +" + prcs_file_name)
             if mode in cmb_list:
-                result_file = edit_pattern(textoutwin, pin_name, atp_files[j], cycle_range,
+                result_file = edit_pattern(textoutwin, pin_name, prcs_file_name, cycle_range,
                                         mode, time_mode, index_mode, user_string, pin_name_ori)
                 pre_file_name = tmp_file_name
                 if result_file not in result:
