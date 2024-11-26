@@ -104,6 +104,15 @@ def main11(atp_files: List[str], merge_config_file: str, textoutwin: Any, pin_ma
             if mode in cmb_list:
                 result_file = edit_pattern(textoutwin, pin_name, prcs_file_name, cycle_range,
                                         mode, time_mode, index_mode, user_string, pin_name_ori)
+
+                # Check is it the temp file from dual post process
+                if result_file.endswith(r"_1stpostprcs.atp"):
+                    if os.path.exists(prcs_file_name):
+                        os.remove(prcs_file_name)
+                    dual_post_prcs_file = result_file.replace(r'_1stpostprcs.atp', r'.atp')
+                    copy_and_rename(result_file, dual_post_prcs_file)
+                    result_file = dual_post_prcs_file
+
                 pre_file_name = tmp_file_name
                 if result_file not in result:
                     result.append(result_file)
