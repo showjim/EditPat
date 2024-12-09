@@ -20,7 +20,7 @@ from src.main import main4, main11
 
 multiprocessing.freeze_support()
 
-version = 'V1.12.23'
+version = 'V1.12.24'
 
 class DemoClass(tk.Tk):
 
@@ -336,7 +336,7 @@ class DemoClass(tk.Tk):
 
         try:
             PinNameOri = PinName
-            if PinMap != "":
+            if len(PinMap) > 0:
                 pinrounp_dict = read_pinmap(PinMap[0])
                 if ("," not in PinName) and (PinName in pinrounp_dict.keys()):
                     PinName = ",".join(pinrounp_dict[PinName])
