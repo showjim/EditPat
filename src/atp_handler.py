@@ -49,6 +49,8 @@ def analyse_merge_config(merge_config_file: str, textoutwin) -> List[Dict]:
             if index == 0:
                 head_list = row
             elif len(row) > 0:
+                if "".join(row) == "":
+                    break
                 cur_config_dict = {
                     "ATPFile": "", 
                     "CycleRange": None,
@@ -74,7 +76,13 @@ def analyse_merge_config(merge_config_file: str, textoutwin) -> List[Dict]:
                         elif i == 4 or i == 7:
                             cur_config_dict["PinName"] = item
                         elif i == 5 or i == 8:
-                            cur_config_dict["CycleRange"] = process_input_cycles(item)
+                            try:
+                                cur_config_dict["CycleRange"] = process_input_cycles(item)
+                            except Exception as e:
+                                content = ",".join(row)
+                                textoutwin(f"Error: Cannot parse the cycle list, content: {content}")
+                                print(f"Error: Cannot parse the cycle list, content: {content}")
+                                cur_config_dict["CycleRange"] = []
                             if "Pattern" not in item:
                                 tmp_dict = cur_config_dict.copy()
                                 config_list.append(tmp_dict)
