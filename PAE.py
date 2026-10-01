@@ -9,14 +9,14 @@ from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
 import traceback
-import multiprocessing, shutil, os
+import multiprocessing
 from multiprocessing import Pool, Manager
 
 # Import from new modular structure
-from src.atp_handler import read_csv, read_pinmap, analyse_merge_config, build_config_from_classical
-from src.pattern_processor import edit_pattern, extract_cycle_on_keyword
-from src.utils import in_list
-from src.main import process_atp_classical, process_atp_simple, dispatch_config_parallel
+from src.atp_handler import (analyse_merge_config, build_config_from_classical,
+                             ConfigError, MODE_LIST)
+from src.pattern_processor import extract_cycle_on_keyword
+from src.main import process_atp_simple, dispatch_config_parallel
 from src.logger import Logger
 
 multiprocessing.freeze_support()
@@ -109,9 +109,7 @@ class PatAutoEditApp(tk.Tk):
         self.ety.config(textvariable=self.contents4)
 
         # Step 4. Please choose function
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG',
-                   'Add Opcode', 'Remove Opcode']
-        self.cmb = ttk.Combobox(topframe, values=CmbList, width=37)
+        self.cmb = ttk.Combobox(topframe, values=MODE_LIST, width=37)
         self.cmb.grid(row=3, column=0)
 
         self.contents5 = StringVar()
@@ -299,6 +297,7 @@ class PatAutoEditApp(tk.Tk):
 
         self.queue = Manager().Queue()
         self.counter = Manager().Value('i', 0)
+        self.failed_count = Manager().Value('i', 0)
         self.pool = Pool(processes=4)
 
         try:
@@ -325,6 +324,9 @@ class PatAutoEditApp(tk.Tk):
             return
         try:
             config_list = analyse_merge_config(CSVFile[0], self.logger)
+        except ConfigError as e:
+            self.logger.error(str(e))
+            return
         except Exception:
             self.put_data_log(traceback.format_exc())
             return
@@ -344,15 +346,18 @@ class PatAutoEditApp(tk.Tk):
         Mode = self.cmb.get()
         TimeMode = self.check_box_var2.get()
         IndexMode = self.check_box_var1.get()
+        UserString = self.ety_user_string.get()
 
-        CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern',
-                   'WFLAG', 'Add Opcode', 'Remove Opcode']
-        if Mode not in CmbList:
+        if Mode not in MODE_LIST:
             self.logger.error("Wrong Choice !!!")
             return
 
         try:
-            config_list = build_config_from_classical(CSVFiles[0], Mode, PinName, TimeMode, IndexMode)
+            config_list = build_config_from_classical(CSVFiles[0], Mode, PinName, TimeMode,
+                                                      IndexMode, UserString)
+        except ConfigError as e:
+            self.logger.error(str(e))
+            return
         except Exception:
             self.put_data_log(traceback.format_exc())
             return
@@ -366,8 +371,14 @@ class PatAutoEditApp(tk.Tk):
 
     def my_callback(self, result):
         self.counter.value += 1
+        if result is None:
+            self.failed_count.value += 1
         if self.counter.value == self.total_tasks:
-            self.put_data_log("All tasks completed!!!")
+            if self.failed_count.value:
+                self.put_data_log(
+                    f"{self.failed_count.value} of {self.total_tasks} file(s) failed. See the log above.")
+            else:
+                self.put_data_log(f"All {self.total_tasks} task(s) completed.")
             self.switchButtonState(self.active_button)
 
     def update_progress(self):

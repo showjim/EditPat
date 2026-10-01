@@ -5,10 +5,9 @@ Created on Dec 8, 2015
 '''
 import os
 from typing import List, Dict, Any, Optional
-from src.utils import in_list
-from src.atp_handler import read_csv, read_pinmap, analyse_merge_config, build_config_from_classical
+from src.atp_handler import (read_pinmap, analyse_merge_config,
+                             build_config_from_classical, missing_requirements, MODE_LIST)
 from src.pattern_processor import edit_pattern
-from src.file_ops import copy_and_rename
 from src.logger import Logger
 
 
@@ -38,38 +37,85 @@ def _normalize_config_item(config_item: Dict, pingroup_dict: Optional[Dict]) -> 
 
 
 def _resolve_atp_path(tmp_file_name: str, atp_files: List[str]) -> int:
-    """Return the index of tmp_file_name in atp_files or -1."""
-    return in_list(tmp_file_name, atp_files)
+    """Return the index of tmp_file_name in atp_files or -1.
+
+    A config names the file as the user sees it, so match on basename, also
+    accepting the name with '.gz' appended so a config written against
+    `x.atp` still finds `x.atp.gz`. Substring matching is deliberately not
+    used: it can silently attach a whole chain to the wrong file.
+    """
+    for i, path in enumerate(atp_files):
+        name = os.path.basename(path)
+        if name == tmp_file_name or name == tmp_file_name + '.gz':
+            return i
+    return -1
+
+
+def _validate_config(config_list: List[Dict], atp_files: List[str], logger: Logger) -> bool:
+    """Check a whole config list before any of it is dispatched.
+
+    Reports every problem rather than stopping at the first, so one run tells
+    the user everything that is wrong. A Pattern that is not in atp_files is a
+    warning and a skip, not an error: a config legitimately covers more files
+    than are selected for a given run.
+
+    Returns True when the run may proceed.
+    """
+    problems = []
+    for op in config_list:
+        for field in missing_requirements(op):
+            problems.append(f"{op.get('Mode', '')} on {op.get('ATPFile', '')}: {field} is required")
+
+    seen = set()
+    for op in config_list:
+        pattern = op.get("ATPFile", "")
+        if pattern in seen:
+            continue
+        seen.add(pattern)
+        if _resolve_atp_path(pattern, atp_files) < 0:
+            logger.warning("Cannot find atp file: " + pattern)
+
+    for message in problems:
+        logger.error(message)
+    if problems:
+        logger.error(f"Configuration rejected, {len(problems)} problem(s) found. Nothing was processed.")
+        return False
+    return True
 
 
 def _run_chained_ops(atp_file_path: str, ops: List[Dict], logger: Logger) -> Optional[str]:
     """Sequentially apply a list of ops to a single ATP file.
 
-    ops is a list of normalized config dicts (TimeMode already '1'/'2', pin group expanded).
-    Returns the final output file path in Output/, or None on error.
+    ops is a list of normalized config dicts (TimeMode already '1'/'2', pin group
+    expanded). Each op reads the previous op's output, which lives in Output/,
+    so an intermediate is always inspectable and nothing is written next to the
+    source ATP.
+
+    Returns the final output file path in Output/, or None if any op failed.
+    A failure stops the chain: later ops depend on the failed op's output, so
+    continuing would produce a file that is neither the requested chain nor the
+    original.
 
     This function is module-level (picklable) so it can be submitted to a
     multiprocessing.Pool as a unit-of-work for one ATP file.
     """
-    cmb_list = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture',
-                'Expand Pattern', 'Compress Pattern',
-                'WFLAG', 'Add Opcode', 'Remove Opcode']
-
     prcs_file_name = atp_file_path
     result_file = None
+    output_path = os.path.join(os.getcwd(), 'Output')
+    prev_output_path = os.path.join(output_path, os.path.basename(atp_file_path))
+
     for idx, op in enumerate(ops):
         mode = op.get("Mode", "")
-        if mode not in cmb_list:
+        if mode not in MODE_LIST:
             logger.error("Wrong Choice !!!")
-            continue
+            return None
 
-        # For subsequent ops on the same file, feed the previous Output back
-        # in as the input (matching legacy process_atp_simple behavior).
-        if idx > 0 and result_file is not None:
-            output_path = os.path.join(os.getcwd(), 'Output')
-            prev_output_path = os.path.join(output_path, os.path.basename(atp_file_path))
-            prcs_file_name = atp_file_path.replace(r'.atp', r'_1stpostprcs.atp')
-            copy_and_rename(prev_output_path, prcs_file_name)
+        if idx > 0:
+            if not os.path.exists(prev_output_path):
+                logger.error("Cannot continue: the previous step produced no output for "
+                             + os.path.basename(atp_file_path))
+                return None
+            prcs_file_name = prev_output_path
 
         logger.info("Start convert file: " + prcs_file_name)
         result_file = edit_pattern(
@@ -80,17 +126,14 @@ def _run_chained_ops(atp_file_path: str, ops: List[Dict], logger: Logger) -> Opt
             mode,
             op.get("TimeMode", '1'),
             op.get("IndexMode", 'Cycle'),
-            "",
+            op.get("UserString", ""),
             op.get("PinNameOri", ""),
         )
 
-        # Handle the _1stpostprcs.atp temp file produced when chaining ops
-        if result_file and result_file.endswith(r"_1stpostprcs.atp"):
-            if os.path.exists(prcs_file_name) and prcs_file_name.endswith(r"_1stpostprcs.atp"):
-                os.remove(prcs_file_name)
-            dual_post_prcs_file = result_file.replace(r'_1stpostprcs.atp', r'.atp')
-            copy_and_rename(result_file, dual_post_prcs_file)
-            result_file = dual_post_prcs_file
+        if result_file is None:
+            logger.error(f"Step {idx + 1} of {len(ops)} failed ({mode}); no output produced for "
+                         + os.path.basename(atp_file_path))
+            return None
 
         logger.info("Done conversion")
 
@@ -98,8 +141,7 @@ def _run_chained_ops(atp_file_path: str, ops: List[Dict], logger: Logger) -> Opt
 
 
 def _group_ops_by_atp(config_list: List[Dict], atp_files: List[str],
-                      pingroup_dict: Optional[Dict], logger: Logger
-                      ) -> List[tuple]:
+                      pingroup_dict: Optional[Dict]) -> List[tuple]:
     """Group a config list into (atp_file_path, [normalized_ops]) tuples.
 
     Ops for the same ATP are kept in their original order (required for the
@@ -113,7 +155,7 @@ def _group_ops_by_atp(config_list: List[Dict], atp_files: List[str],
             continue
         j = _resolve_atp_path(tmp_file_name, atp_files)
         if j < 0:
-            logger.warning("Cannot find atp file: " + tmp_file_name)
+            # Already reported by _validate_config, which runs first.
             continue
         atp_path = atp_files[j]
         norm = _normalize_config_item(config_item, pingroup_dict)
@@ -147,8 +189,11 @@ def process_atp_simple(atp_files: List[str],
     if config_list is None:
         config_list = analyse_merge_config(merge_config_file, logger)
 
+    if not _validate_config(config_list, atp_files, logger):
+        return []
+
     pingroup_dict = read_pinmap(pin_map) if pin_map else None
-    groups = _group_ops_by_atp(config_list, atp_files, pingroup_dict, logger)
+    groups = _group_ops_by_atp(config_list, atp_files, pingroup_dict)
 
     result: List[str] = []
     for atp_path, ops in groups:
@@ -170,7 +215,8 @@ def process_atp_classical(atp_files: List[str], csv_files: List[str], pin_name: 
         logger.error("Only ONE CSV file supported !!!")
         return []
 
-    config_list = build_config_from_classical(csv_files[0], mode, pin_name, time_mode, index_mode)
+    config_list = build_config_from_classical(csv_files[0], mode, pin_name, time_mode,
+                                              index_mode, user_string)
     pin_map_value = pin_map[0] if (hasattr(pin_map, '__len__') and len(pin_map) > 0) else (pin_map or "")
     return process_atp_simple(atp_files, logger=logger, pin_map=pin_map_value, config_list=config_list)
 
@@ -184,16 +230,28 @@ def dispatch_config_parallel(pool, atp_files: List[str], config_list: List[Dict]
     """Submit all work in config_list to `pool`, one task per ATP file.
 
     Returns the number of tasks submitted (== number of distinct ATP files with
-    valid ops). Each task runs `_run_chained_ops` on one ATP file with its
-    ordered sequence of ops. `callback` is invoked once per finished task.
+    valid ops), or 0 if the config was rejected. Each task runs `_run_chained_ops`
+    on one ATP file with its ordered sequence of ops.
+
+    `callback` is invoked once per finished task, with the output path on success
+    or None on failure. It is attached as the error callback as well, so an
+    unexpected exception in a worker still counts as a finished task — otherwise
+    the completion counter never reaches the total and the UI waits forever.
     """
+    if not _validate_config(config_list, atp_files, mp_logger):
+        return 0
+
     pingroup_dict = read_pinmap(pin_map) if pin_map else None
-    groups = _group_ops_by_atp(config_list, atp_files, pingroup_dict, mp_logger)
+    groups = _group_ops_by_atp(config_list, atp_files, pingroup_dict)
+
+    def task_raised(exc):
+        mp_logger.error(f"Unexpected failure: {exc!r}")
+        callback(None)
 
     total = 0
     for atp_path, ops in groups:
         pool.apply_async(_run_chained_ops, args=(atp_path, ops, mp_logger),
-                         callback=callback)
+                         callback=callback, error_callback=task_raised)
         total += 1
     return total
 

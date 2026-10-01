@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 import os
 from pathlib import Path
+from src.atp_handler import ConfigError, MODE_LIST
 from src.main import process_atp_simple
 from src.file_ops import  get_all_files_list, make_zip
 from src.logger import Logger
@@ -135,14 +136,16 @@ By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read
     st.write('`2.1. Config table`')
     edited_placeholder = st.empty()
     if st.session_state["InitCSVFileFlag"] == False:
-        df = pd.DataFrame(
-            [
-                {"Instance(Optional)": "sample", "Pattern": "sample.atp", "Status": "NotStart",
-                 "Process Type": "DSSC Capture", "Pin or Method": "TDO", "Cycle": "[0-1];[3-3]",
-                 "Process Type 2": "", "Pin or Method 2": "", "Cycle 2": ""},
-            ]
-        )
-        st.session_state["CSVFileTab"] = df
+        # One row per operation. Rows sharing a Pattern are one chain, applied
+        # top to bottom, each step consuming the previous step's output.
+        st.session_state["CSVFileTab"] = pd.DataFrame([
+            {"Instance": "", "Pattern": "sample.atp", "Status": "",
+             "Process Type": "DSSC Capture", "Pin or Method": "TDO", "Cycle": "[0-1];[3-3]",
+             "User String": ""},
+            {"Instance": "", "Pattern": "sample.atp", "Status": "",
+             "Process Type": "DSSC Source", "Pin or Method": "TDI", "Cycle": "[0-1];[3-3]",
+             "User String": ""},
+        ])
         st.session_state["InitCSVFileFlag"] = True
 
     ## 2.2 CSV config
@@ -161,7 +164,6 @@ By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read
             for key, value in updates.items():
                 st.session_state["CSVFileTab"].loc[st.session_state["CSVFileTab"].index == index, key] = value
 
-    CmbList = ['DSSC Capture', 'DSSC Source', 'CMEM/HRAM Capture', 'Expand Pattern', 'Compress Pattern', 'WFLAG']
     df = st.session_state["CSVFileTab"]
     edited_df = edited_placeholder.data_editor(
         st.session_state["CSVFileTab"],
@@ -172,15 +174,13 @@ By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read
                 "Process Type",
                 help="How would you like to process ATP file",
                 width="medium",
-                options=CmbList,
+                options=MODE_LIST,
                 required=True,
             ),
-            "Process Type 2": st.column_config.SelectboxColumn(
-                "Process Type 2",
-                help="How would you like to process ATP file",
+            "User String": st.column_config.TextColumn(
+                "User String",
+                help="Only used by Add Opcode / Remove Opcode",
                 width="medium",
-                options=CmbList,
-                required=False,
             ),
         },
         on_change = df_on_change, args = [df],
@@ -208,8 +208,14 @@ By ENTERING PASSWORD "teradyne" of this tool, you acknowledge that you have read
     st.subheader('Step 3. Run post-process')
     if st.button("Run Post-Process"):
         merge_config_file = os.path.join(OutputPath, "sample.csv")
-        merge_config_file_content = st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
-        result_fils = process_atp_simple(st.session_state["FileList"], merge_config_file, logger, st.session_state["PinmapFile"]) #print_info)
+        st.session_state["CSVFileTab"].to_csv(merge_config_file, index=False)
+        st.session_state["ResultFiles"] = []
+        try:
+            result_fils = process_atp_simple(st.session_state["FileList"], merge_config_file,
+                                             logger, st.session_state["PinmapFile"])
+        except ConfigError as e:
+            st.error(str(e))
+            result_fils = []
         st.session_state["ResultFiles"] = result_fils
         st.session_state["ZipFilesFlag"] = True
 
