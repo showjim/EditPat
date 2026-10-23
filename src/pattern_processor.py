@@ -3,7 +3,7 @@ Pattern processing module for ATP file modifications
 '''
 import os, csv
 import re
-from typing import List, Any, Tuple
+from typing import List, Optional
 from src.file_ops import openfile, copy_and_rename
 from src.utils import get_repeat_cnt, cmp, check_in_range, check_in_same_range, get_all_files
 from src.atp_handler import find_pin_index
@@ -271,15 +271,15 @@ def _write_instrument_header(new_atp_file, mode: str, pin_name: str, pin_name_or
 
 
 def edit_pattern(logger: Logger, pin_name: str, something: str, cycle_range: List,
-                mode: str, timemode: str, index_mode: str, user_string: str = '', 
-                pin_name_ori: str = "") -> str:
+                mode: str, timemode: str, index_mode: str, user_string: str = '',
+                pin_name_ori: str = "") -> Optional[str]:
     """Edit ATP pattern file according to specified mode and parameters.
-    
-    Dispatches to mode-specific handler functions for the actual pattern modifications.
-    """
-    # Track if any errors occurred during processing
-    has_errors = False
 
+    Dispatches to mode-specific handler functions for the actual pattern modifications.
+
+    Returns the path to the edited file in Output/, or None if the edit failed.
+    Callers must not treat a None return as a produced file.
+    """
     output_path = os.path.join(os.getcwd(), 'Output')
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -341,8 +341,7 @@ def edit_pattern(logger: Logger, pin_name: str, something: str, cycle_range: Lis
                             index = find_pin_index(mode, pin_name, line, logger)
                             if 0 in index:
                                 logger.error('Cannot find pinname')
-                                has_errors = True
-                                return something
+                                return None
                             new_atp_file.write(line)
 
                         else:
@@ -420,8 +419,7 @@ def edit_pattern(logger: Logger, pin_name: str, something: str, cycle_range: Lis
                                         line = user_string + '\t' + line
 
                             except _PatternEditError:
-                                has_errors = True
-                                return something
+                                return None
 
                         new_atp_file.write(line)
 
@@ -433,47 +431,37 @@ def edit_pattern(logger: Logger, pin_name: str, something: str, cycle_range: Lis
                     if len(line) == 0:
                         if cycle_num < last_cycle_num:
                             logger.error('The cycle you specified exceeds the total number of cycles in the pattern: ' + something)
-                            has_errors = True
-                            return something
+                            return None
                         break
 
-            if os.path.exists(remove_repeat_file):
-                if index_mode == 'Cycle':
-                    os.remove(remove_repeat_file)
-            else:
-                logger.error("The file " + remove_repeat_file + " does not exist")
-                has_errors = True
-                return something
+        if os.path.exists(temp_file):
+            # Merge instrument declarations if in DSSC modes
+            if mode in ['DSSC Capture', 'DSSC Source']:
+                merge_instrument_declare(temp_file)
 
-        # Only rename temp file to final output if no errors occurred
-        if not has_errors:
-            if os.path.exists(temp_file):
-                # Merge instrument declarations if in DSSC modes
-                if mode in ['DSSC Capture', 'DSSC Source']:
-                    merge_instrument_declare(temp_file)
-                
-                if os.path.exists(otherthing):
-                    os.remove(otherthing)
-                os.rename(temp_file, otherthing)
-                logger.info("Done conversion: " + something)
-                return otherthing
-        else:
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
-            return something
+            if os.path.exists(otherthing):
+                os.remove(otherthing)
+            os.rename(temp_file, otherthing)
+            logger.info("Done conversion: " + something)
+            return otherthing
 
     except _PatternEditError:
-        has_errors = True
+        # Already logged where it was raised.
         if temp_file and os.path.exists(temp_file):
             os.remove(temp_file)
-        return something
+        return None
     except Exception as e:
         logger.error(f"An unexpected error occurred: {str(e)}")
         if temp_file and os.path.exists(temp_file):
             os.remove(temp_file)
-        return something
+        return None
+    finally:
+        # The repeat-stripped copy is scratch of our own making and must not
+        # outlive this call, on any path including the failing ones.
+        if index_mode == 'Cycle' and os.path.exists(remove_repeat_file):
+            os.remove(remove_repeat_file)
 
-    return something  # Return original file path if we somehow get here
+    return None  # No output was produced if we somehow get here
 
 def extract_cycle_on_keyword(fileFolder: str, keyword: str, logger: Logger):
     """Extract cycle_on keyword from ATP files."""

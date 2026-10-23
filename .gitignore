@@ -13,3 +13,4 @@
 
 project/
 workDir/
+/test/__pycache__
